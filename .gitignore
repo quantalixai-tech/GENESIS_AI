@@ -1,40 +1,69 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# =============================================================================
+# Genesis — .gitignore
+# =============================================================================
 
-# Dependencies
-node_modules
+# ── Node.js / JS ──────────────────────────────────────────────────────────────
+node_modules/
 .pnp
 .pnp.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Local env files — never commit secrets
-# .env.example and .env.development are safe to commit (no real secrets)
-# .env and .env.local contain real secrets — must never be committed
+# ── Build Outputs ─────────────────────────────────────────────────────────────
+dist/
+build/
+out/
+.next/
+.turbo/
+
+# ── Tooling ───────────────────────────────────────────────────────────────────
+.vercel
+
+# ── Python ────────────────────────────────────────────────────────────────────
+# Single shared venv at repo root (created by `uv sync`)
+.venv/
+# Per-package venvs (e.g. packages/db/.venv from manual setup steps)
+**/venv/
+**/.venv/
+# Byte-compiled / optimized / DLL files
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+# Distribution / packaging
+*.egg
+*.egg-info/
+.eggs/
+# Testing & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+# mypy
+.mypy_cache/
+# Ruff
+.ruff_cache/
+
+# ── Environment / Secrets ─────────────────────────────────────────────────────
+# .env.example and .env.development are SAFE to commit (no real secrets)
+# .env, .env.local, .env.*.local contain real secrets — NEVER commit
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Testing
-coverage
+# ── Testing ───────────────────────────────────────────────────────────────────
+coverage/
 
-# Turbo
-.turbo
-
-# Vercel
-.vercel
-
-# Build Outputs
-.next/
-out/
-build
-dist
-
-
-# Debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Misc
+# ── OS / Editor ───────────────────────────────────────────────────────────────
 .DS_Store
+Thumbs.db
 *.pem
+*.key
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.idea/
+*.swp
+*.swo

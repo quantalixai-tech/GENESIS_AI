@@ -1,0 +1,9 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/packages/db",
+    "${workspaceFolder}/apps/api/src",
+    "${workspaceFolder}/apps/worker/src"
+  ],
+  "python.analysis.typeCheckingMode": "basic"
+}

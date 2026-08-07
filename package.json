@@ -11,7 +11,9 @@
     "genesis:up": "bash scripts/up.sh",
     "genesis:down": "bash scripts/down.sh",
     "genesis:restart": "bash scripts/restart.sh",
-    "genesis:clean": "bash scripts/clean.sh"
+    "genesis:clean": "bash scripts/clean.sh",
+    "genesis:platform:up": "docker compose -f infrastructure/docker/compose/docker-compose.yml -f infrastructure/docker/compose/docker-compose.platform.yml up -d --build",
+    "genesis:platform:down": "docker compose -f infrastructure/docker/compose/docker-compose.yml -f infrastructure/docker/compose/docker-compose.platform.yml down"
   },
   "devDependencies": {
     "@types/node": "^22.15.3",

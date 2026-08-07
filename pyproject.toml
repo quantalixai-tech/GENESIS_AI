@@ -1,0 +1,15 @@
+[project]
+name = "genesis"
+version = "0.0.0"
+requires-python = ">=3.10"
+description = "Genesis Monorepo (Python Workspace)"
+
+[tool.uv.workspace]
+members = [
+    "apps/api",
+    "apps/worker",
+    "packages/db",
+]
+
+[tool.uv.sources]
+genesis_db = { workspace = true }
