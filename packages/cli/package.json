@@ -1,0 +1,20 @@
+{
+  "name": "@genesis/cli",
+  "version": "0.1.0",
+  "description": "Genesis AI Platform CLI — developer interface for managing the platform",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "genesis": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src/",
+    "check-types": "tsc --noEmit"
+  },
+  "keywords": ["genesis", "ai", "cli"],
+  "engines": {
+    "node": ">=18"
+  }
+}

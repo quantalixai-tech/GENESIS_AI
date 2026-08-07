@@ -1,0 +1,131 @@
+# =============================================================================
+# Genesis — Docker Compose Override Slots
+#
+# This file reserves slots for future infrastructure layers.
+# Uncomment and extend as each layer is implemented.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.override.yml up -d
+# =============================================================================
+
+name: genesis
+
+# =============================================================================
+# Future: AI Services Layer
+# =============================================================================
+# services:
+#   ollama:
+#     image: ollama/ollama:latest
+#     container_name: genesis-ollama
+#     ports:
+#       - "${OLLAMA_PORT:-11434}:11434"
+#     volumes:
+#       - ollama-models:/root/.ollama
+#     networks:
+#       - genesis-network
+#     labels:
+#       genesis.service: "ollama"
+#       genesis.layer: "ai"
+#
+#   model-router:
+#     image: genesis/model-router:latest
+#     container_name: genesis-model-router
+#     networks:
+#       - genesis-network
+#     labels:
+#       genesis.service: "model-router"
+#       genesis.layer: "ai"
+
+# =============================================================================
+# Future: Platform Services Layer
+# =============================================================================
+# services:
+#   api:
+#     build:
+#       context: ../../../../apps/api
+#       dockerfile: Dockerfile
+#     container_name: genesis-api
+#     ports:
+#       - "8080:8080"
+#     networks:
+#       - genesis-network
+#     depends_on:
+#       postgres:
+#         condition: service_healthy
+#       nats:
+#         condition: service_healthy
+#     labels:
+#       genesis.service: "api"
+#       genesis.layer: "platform"
+#
+#   worker:
+#     build:
+#       context: ../../../../apps/worker
+#       dockerfile: Dockerfile
+#     container_name: genesis-worker
+#     networks:
+#       - genesis-network
+#     labels:
+#       genesis.service: "worker"
+#       genesis.layer: "platform"
+#
+#   web:
+#     build:
+#       context: ../../../../apps/web
+#       dockerfile: Dockerfile
+#     container_name: genesis-web
+#     ports:
+#       - "3000:3000"
+#     networks:
+#       - genesis-network
+#     labels:
+#       genesis.service: "web"
+#       genesis.layer: "platform"
+
+# =============================================================================
+# Future: Observability Layer
+# =============================================================================
+# services:
+#   prometheus:
+#     image: prom/prometheus:latest
+#     container_name: genesis-prometheus
+#     ports:
+#       - "${PROMETHEUS_PORT:-9090}:9090"
+#     networks:
+#       - genesis-network
+#     labels:
+#       genesis.service: "prometheus"
+#       genesis.layer: "observability"
+#
+#   grafana:
+#     image: grafana/grafana:latest
+#     container_name: genesis-grafana
+#     ports:
+#       - "${GRAFANA_PORT:-3001}:3001"
+#     networks:
+#       - genesis-network
+#     labels:
+#       genesis.service: "grafana"
+#       genesis.layer: "observability"
+#
+#   loki:
+#     image: grafana/loki:latest
+#     container_name: genesis-loki
+#     ports:
+#       - "${LOKI_PORT:-3100}:3100"
+#     networks:
+#       - genesis-network
+#     labels:
+#       genesis.service: "loki"
+#       genesis.layer: "observability"
+
+# =============================================================================
+# Future: Named Volumes for additional services
+# =============================================================================
+# volumes:
+#   ollama-models:
+#     driver: local
+#   prometheus-data:
+#     driver: local
+#   grafana-data:
+#     driver: local

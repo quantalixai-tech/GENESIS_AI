@@ -1,0 +1,126 @@
+# =============================================================================
+# Genesis — Core Infrastructure
+# Version: 0.1.0
+#
+# Services: PostgreSQL · NATS · MinIO
+#
+# Usage:
+#   docker compose --env-file ../../../.env up -d
+#   docker compose --env-file ../../../.env down
+#
+# Future layers (use override files):
+#   AI Services    — docker-compose.ai.yml
+#   Platform       — docker-compose.platform.yml
+#   Observability  — docker-compose.observability.yml
+# =============================================================================
+
+name: genesis
+
+# =============================================================================
+# Named Volumes — data persists across container restarts
+# =============================================================================
+volumes:
+  postgres-data:
+    driver: local
+  nats-data:
+    driver: local
+  minio-data:
+    driver: local
+
+# =============================================================================
+# Networks — all future containers join genesis-network
+# =============================================================================
+networks:
+  genesis-network:
+    name: genesis-network
+    driver: bridge
+
+# =============================================================================
+# Services
+# =============================================================================
+services:
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — primary relational store
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: genesis-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-genesis}
+      POSTGRES_USER: ${POSTGRES_USER:-genesis}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-genesis}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ../../postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - genesis-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-genesis} -d ${POSTGRES_DB:-genesis}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    labels:
+      genesis.service: "postgres"
+      genesis.layer: "core"
+      genesis.version: "0.1.0"
+
+  # ---------------------------------------------------------------------------
+  # NATS — event bus / message broker (JetStream enabled)
+  # ---------------------------------------------------------------------------
+  nats:
+    image: nats:2.10-alpine
+    container_name: genesis-nats
+    restart: unless-stopped
+    command: ["-c", "/etc/nats/nats.conf"]
+    ports:
+      - "${NATS_PORT:-4222}:4222"           # client connections
+      - "${NATS_MONITORING_PORT:-8222}:8222" # HTTP monitoring
+    volumes:
+      - nats-data:/data
+      - ../../nats/nats.conf:/etc/nats/nats.conf:ro
+    networks:
+      - genesis-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8222/healthz | grep -q 'ok'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    labels:
+      genesis.service: "nats"
+      genesis.layer: "core"
+      genesis.version: "0.1.0"
+
+  # ---------------------------------------------------------------------------
+  # MinIO — S3-compatible object storage for artifacts
+  # ---------------------------------------------------------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: genesis-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minio123}
+    ports:
+      - "${MINIO_PORT:-9000}:9000"         # S3 API
+      - "${MINIO_CONSOLE_PORT:-9001}:9001" # Web console
+    volumes:
+      - minio-data:/data
+    networks:
+      - genesis-network
+    healthcheck:
+      test: ["CMD-SHELL", "mc ready local 2>/dev/null || curl -f http://localhost:9000/minio/health/live"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    labels:
+      genesis.service: "minio"
+      genesis.layer: "core"
+      genesis.version: "0.1.0"

@@ -1,0 +1,68 @@
+{
+  "version": "0.1.0",
+  "phase": "0.2",
+  "description": "Core infrastructure — Platform Bootstrap",
+  "services": [
+    {
+      "name": "postgres",
+      "image": "postgres:16-alpine",
+      "layer": "core",
+      "port": 5432,
+      "status": "active"
+    },
+    {
+      "name": "nats",
+      "image": "nats:2.10-alpine",
+      "layer": "core",
+      "port": 4222,
+      "status": "active"
+    },
+    {
+      "name": "minio",
+      "image": "minio/minio:latest",
+      "layer": "core",
+      "port": 9000,
+      "status": "active"
+    }
+  ],
+  "planned_services": [
+    {
+      "name": "ollama",
+      "layer": "ai",
+      "phase": "1.0",
+      "status": "planned"
+    },
+    {
+      "name": "api",
+      "layer": "platform",
+      "phase": "0.3",
+      "status": "planned"
+    },
+    {
+      "name": "worker",
+      "layer": "platform",
+      "phase": "0.3",
+      "status": "planned"
+    },
+    {
+      "name": "web",
+      "layer": "platform",
+      "phase": "0.4",
+      "status": "planned"
+    },
+    {
+      "name": "prometheus",
+      "layer": "observability",
+      "phase": "1.0",
+      "status": "planned"
+    },
+    {
+      "name": "grafana",
+      "layer": "observability",
+      "phase": "1.0",
+      "status": "planned"
+    }
+  ],
+  "networks": ["genesis-network"],
+  "volumes": ["postgres-data", "nats-data", "minio-data"]
+}

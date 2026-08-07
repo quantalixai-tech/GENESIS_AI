@@ -5,7 +5,9 @@ node_modules
 .pnp
 .pnp.js
 
-# Local env files
+# Local env files — never commit secrets
+# .env.example and .env.development are safe to commit (no real secrets)
+# .env and .env.local contain real secrets — must never be committed
 .env
 .env.local
 .env.development.local
