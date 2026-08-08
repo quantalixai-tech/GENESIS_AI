@@ -1,21 +1,19 @@
-# Genesis
+# GENESIS AI
 
-> **AI Software Engineering Operating System**
+> **AI-Driven Software Development Platform**
 
-Genesis is a self-hosted, open-source platform for AI-assisted software engineering.
-It provides the infrastructure, workspace management, and AI orchestration layer
-for teams who want to run powerful AI development workflows on their own hardware.
+GENESIS AI is a self-hosted platform that builds complete software applications from natural-language conversations. Describe what you want — the AI understands your requirements, designs the architecture, generates production-ready code, validates it automatically, and repairs failures without manual intervention.
 
 ---
 
-## Current Phase: 0.3 — API Core
+## Current Phase: 0.3 — Core Platform Foundation
 
 ```
 ✓ Phase 0.1 — Monorepo Bootstrap    (pnpm · Turborepo · TypeScript · ESLint)
 ✓ Phase 0.2 — Infrastructure        (PostgreSQL · NATS · MinIO · Docker Compose)
-✓ Phase 0.3 — API Core              (FastAPI · SQLModel · Alembic · JWT Auth)
-  Phase 0.4 — Web & Dashboard       (Login · Projects · Workspace UI)
-  Phase 1.0 — AI Integration        (Ollama · Model Router · Agents)
+✓ Phase 0.3 — Platform Foundation   (FastAPI · SQLModel · Alembic · JWT · AI Governance)
+  Phase 0.4 — Web Application       (Auth UI · Workspace UI · Project Management)
+  Phase 1.0 — AI Integration        (Ollama · Model Router · Agent Orchestration)
 ```
 
 ---
@@ -23,118 +21,88 @@ for teams who want to run powerful AI development workflows on their own hardwar
 ## Quick Start
 
 ```bash
-git clone https://github.com/your-org/genesis
-cd genesis
+# 1. Clone the repository
+git clone https://github.com/quantalixai-tech/GENESIS_AI
+cd GENESIS_AI
 
-# First time setup (copies .env, checks Docker)
+# 2. First-time setup (checks Docker, creates .env)
 bash scripts/setup.sh
 
-# Start core infrastructure (PostgreSQL · NATS · MinIO)
-bash scripts/up.sh
+# 3. Set your JWT_SECRET in .env (required — no default)
+#    python -c "import secrets; print(secrets.token_hex(32))"
 
-# Start the full platform (infrastructure + API + Worker)
-pnpm genesis:platform:up
+# 4. Start the full platform
+docker compose up -d --build
+
+# 5. Run database migrations
+docker compose exec api sh -c "DATABASE_URL=\$DATABASE_URL alembic -c /app/packages/db/alembic.ini upgrade head"
 ```
 
-The API will be live at **http://localhost:8080**.
-Interactive docs (Swagger UI) at **http://localhost:8080/docs**.
+**API:** http://localhost:8080 · **Swagger UI:** http://localhost:8080/docs
+
+> For native, Docker, and DevContainer development workflows, see [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
+
+---
+
+## Architecture
+
+```
+Browser / Client
+     ↓
+Next.js Web (port 3000)
+     ↓
+FastAPI REST API (port 8080)
+     ↓                    ↓
+PostgreSQL (5432)    NATS Event Bus (4222)
+                          ↓
+                    Genesis Worker
+                          ↓
+                    AI Agent Engine (Phase 1.0)
+                          ↓
+                    MinIO Object Storage (9000)
+```
 
 ---
 
 ## Services
 
-| Service | Purpose | Port |
+| Service | Port | Purpose |
 |---|---|---|
-| **PostgreSQL** | Primary relational database | `5432` |
-| **NATS** | Event bus / message broker (JetStream) | `4222` |
-| **MinIO** | S3-compatible object storage | `9000` |
-| **MinIO Console** | Web management UI | `9001` |
-| **NATS Monitor** | Health & metrics | `8222` |
-| **Genesis API** | FastAPI REST backend | `8080` |
-| **Genesis Worker** | Async NATS-driven job processor | — |
+| **Genesis API** | `8080` | FastAPI REST backend |
+| **Genesis Web** | `3000` | Next.js frontend (Phase 0.4) |
+| **PostgreSQL** | `5432` | Primary relational database |
+| **NATS** | `4222` | Event bus / message broker |
+| **MinIO** | `9000` | S3-compatible object storage |
+| **MinIO Console** | `9001` | MinIO web management UI |
+| **NATS Monitor** | `8222` | NATS health & metrics |
 
 ---
 
 ## Repository Structure
 
 ```
-genesis/
+GENESIS_AI/
 ├── apps/
-│   ├── api/          ← FastAPI REST API (Python)
-│   │   ├── src/
-│   │   │   ├── main.py
-│   │   │   ├── core/security.py
-│   │   │   └── api/routes/
-│   │   │       ├── auth.py
-│   │   │       ├── health.py
-│   │   │       ├── workspaces.py
-│   │   │       └── projects.py
-│   │   └── Dockerfile
-│   ├── worker/       ← Async Python worker (NATS consumer)
-│   ├── web/          ← Web frontend (Phase 0.4)
-│   └── dashboard/    ← System dashboard (Phase 0.4)
-│
+│   ├── api/          ← FastAPI backend (Python)
+│   │   └── src/
+│   │       ├── core/     Config, errors, logging, middleware, security
+│   │       ├── api/v1/   Route handlers
+│   │       ├── schemas/  API contracts
+│   │       └── services/ Business logic
+│   ├── web/          ← Next.js frontend
+│   ├── worker/       ← NATS consumer (Python)
+│   └── dashboard/    ← Admin dashboard (Phase 0.4)
 ├── packages/
-│   ├── db/           ← Shared Python DB package (SQLModel + Alembic)
-│   │   ├── genesis_db/
-│   │   │   ├── models.py
-│   │   │   ├── database.py
-│   │   │   └── __init__.py
-│   │   └── alembic/
-│   ├── cli/          ← Genesis CLI (TypeScript)
-│   ├── ui/           ← Shared UI components
-│   ├── sdk/          ← Client SDK
-│   ├── types/        ← Shared TypeScript types
-│   ├── config/       ← Shared configuration
-│   └── shared/       ← Shared utilities
-│
-├── infrastructure/
-│   ├── docker/compose/
-│   │   ├── docker-compose.yml           ← Core infra (PostgreSQL, NATS, MinIO)
-│   │   └── docker-compose.platform.yml  ← Platform services (API, Worker)
-│   ├── postgres/     ← DB init scripts
-│   ├── nats/         ← NATS config
-│   └── minio/        ← MinIO config
-│
-├── docs/
-│   ├── adr/          ← Architectural Decision Records
-│   ├── rfc/          ← Request for Comments (specs)
-│   ├── architecture/ ← System design documents
-│   └── process.md    ← Engineering process
-│
-├── scripts/
-│   ├── setup.sh      ← First-time setup
-│   ├── up.sh         ← Start infrastructure
-│   └── down.sh       ← Stop infrastructure
-│
-├── pyproject.toml    ← Python workspace root (uv)
-├── uv.lock           ← Python lockfile
-├── pyrightconfig.json← Python type checker config
-└── package.json      ← JS workspace root (pnpm + Turborepo)
-```
-
----
-
-## Python Setup (uv)
-
-Genesis uses [`uv`](https://github.com/astral-sh/uv) for Python package management — a single shared `.venv` at the repo root.
-
-```bash
-# Install uv (first time only)
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Install all Python dependencies (creates .venv at repo root)
-uv sync --all-packages
-
-# Run the API locally (development)
-PYTHONPATH=apps/api/src:packages/db \
-  DATABASE_URL=postgresql://genesis:genesis@localhost:5432/genesis \
-  uv run uvicorn main:app --reload --app-dir apps/api/src
-
-# Run database migrations
-cd packages/db
-DATABASE_URL=postgresql://genesis:genesis@localhost:5432/genesis \
-  uv run alembic upgrade head
+│   ├── db/           ← Shared DB models + Alembic migrations (genesis_db)
+│   ├── ui/           ← Shared React components (@genesis/ui)
+│   └── cli/          ← Developer CLI (Phase 0.3+)
+├── infrastructure/   ← Docker Compose, NATS config, PostgreSQL init
+├── docs/             ← Architecture, ADRs, RFCs, governance
+├── scripts/          ← Infrastructure lifecycle scripts
+├── .devcontainer/    ← DevContainer configuration
+├── docker-compose.yml ← Root convenience compose file
+├── pyproject.toml    ← Python workspace (uv)
+└── package.json      ← JS workspace (pnpm + Turborepo)
 ```
 
 ---
@@ -143,46 +111,56 @@ DATABASE_URL=postgresql://genesis:genesis@localhost:5432/genesis \
 
 | Method | Route | Auth | Description |
 |---|---|---|---|
-| `GET` | `/api/health` | No | Health check |
-| `POST` | `/api/auth/signup` | No | Register user |
-| `POST` | `/api/auth/login` | No | Login, returns JWT |
-| `GET` | `/api/auth/me` | JWT | Current user |
-| `GET` | `/api/workspaces` | JWT | List workspaces |
-| `POST` | `/api/workspaces` | JWT | Create workspace |
-| `GET` | `/api/projects` | JWT | List projects |
-| `POST` | `/api/projects` | JWT | Create project |
-| `DELETE` | `/api/projects/{id}` | JWT | Delete project |
+| `GET` | `/api/health` | No | Platform health check (checks DB) |
+| `POST` | `/api/v1/auth/signup` | No | Register user |
+| `POST` | `/api/v1/auth/login` | No | Login, returns JWT |
+| `GET` | `/api/v1/auth/me` | JWT | Current user |
+| `GET` | `/api/v1/workspaces` | JWT | List workspaces |
+| `POST` | `/api/v1/workspaces` | JWT | Create workspace |
+| `GET` | `/api/v1/projects?workspace_id=` | JWT | List projects |
+| `POST` | `/api/v1/projects` | JWT | Create project |
+| `DELETE` | `/api/v1/projects/{id}` | JWT | Delete project |
 
-Full interactive docs: **http://localhost:8080/docs**
-
----
-
-## Engineering Process
-
-Every phase follows: **ADR → RFC → Implementation → Acceptance Criteria → Verification**
-
-See [docs/process.md](docs/process.md) for the full process.
-
-| Document | Description |
-|---|---|
-| [docs/infrastructure.md](docs/infrastructure.md) | Infrastructure contract |
-| [docs/process.md](docs/process.md) | Engineering process |
-| [docs/adr/0001-monorepo.md](docs/adr/0001-monorepo.md) | ADR: Monorepo strategy |
-| [docs/adr/0003-tech-stack.md](docs/adr/0003-tech-stack.md) | ADR: Infrastructure stack |
-| [docs/adr/0004-api-tech-stack.md](docs/adr/0004-api-tech-stack.md) | ADR: Python / FastAPI |
-| [docs/rfc/0005-api-core-spec.md](docs/rfc/0005-api-core-spec.md) | RFC: API Core Specification |
+Full interactive docs at **http://localhost:8080/docs** (development only).
 
 ---
 
 ## Prerequisites
 
-| Tool | Version | Purpose |
-|---|---|---|
-| [Docker Desktop](https://www.docker.com/products/docker-desktop) | ≥ 4.0 | Container runtime |
-| [Node.js](https://nodejs.org/) | ≥ 18 | JS tooling (pnpm, Turborepo) |
-| [pnpm](https://pnpm.io/) | ≥ 9.0 | JS package manager |
-| [uv](https://github.com/astral-sh/uv) | ≥ 0.12 | Python package manager |
-| [Python](https://python.org) | ≥ 3.11 | API & Worker runtime |
+| Tool | Install |
+|---|---|
+| Docker Desktop ≥ 4.25 | https://docker.com/products/docker-desktop |
+| Node.js ≥ 18 | https://nodejs.org |
+| pnpm ≥ 9 | `npm i -g pnpm@9` |
+| uv ≥ 0.12 | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
+| Python ≥ 3.11 | https://python.org |
+
+---
+
+## Development
+
+See **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** for:
+- Native development setup
+- Docker development
+- DevContainer development
+- DevContainer CLI usage
+- Database migrations
+- Environment configuration
+- Troubleshooting
+
+---
+
+## Engineering Process
+
+Every change follows: **ADR → RFC → Implementation Plan → Code → Acceptance Criteria → Verification**
+
+| Document | Purpose |
+|---|---|
+| [docs/process.md](docs/process.md) | Engineering process |
+| [docs/infrastructure.md](docs/infrastructure.md) | Infrastructure contract |
+| [docs/AI_GOVERNANCE.md](docs/AI_GOVERNANCE.md) | AI governance specification |
+| [docs/PROJECT_AUDIT.md](docs/PROJECT_AUDIT.md) | Audit findings & priorities |
+| [AGENTS.md](AGENTS.md) | Rules for AI and human developers |
 
 ---
 

@@ -4,7 +4,11 @@ from sqlalchemy import pool
 from alembic import context
 from sqlmodel import SQLModel
 import os
-import genesis_db  # This imports all models to populate SQLModel.metadata
+
+# Import all models so SQLModel.metadata is fully populated for autogenerate.
+# governance module must be imported explicitly alongside the core models.
+import genesis_db  # noqa: F401 — registers User, Workspace, Project
+import genesis_db.governance  # noqa: F401 — registers ModelRegistry, PromptRegistry, AgentRegistry, AIRun
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

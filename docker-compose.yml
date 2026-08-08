@@ -1,0 +1,184 @@
+# =============================================================================
+# Genesis — Root docker-compose.yml (Developer Convenience)
+#
+# Equivalent to:
+#   docker compose \
+#     -f infrastructure/docker/compose/docker-compose.yml \
+#     -f infrastructure/docker/compose/docker-compose.platform.yml \
+#     up -d --build
+#
+# Usage:
+#   cp .env.example .env && nano .env   # set JWT_SECRET
+#   docker compose up -d --build        # start everything
+#   docker compose down                 # stop everything
+#   docker compose logs -f              # follow all logs
+#   docker compose logs -f api          # follow API only
+#   docker compose ps                   # check status
+#
+# Requires: JWT_SECRET set in .env (no default — will fail to start without it)
+# =============================================================================
+
+name: genesis
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  postgres-data:
+    driver: local
+  nats-data:
+    driver: local
+  minio-data:
+    driver: local
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  genesis-network:
+    name: genesis-network
+    driver: bridge
+
+# =============================================================================
+# Core Infrastructure Services
+# =============================================================================
+services:
+  postgres:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/postgres/Dockerfile
+    image: genesis-postgres:local
+    container_name: genesis-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-genesis}
+      POSTGRES_USER: ${POSTGRES_USER:-genesis}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-genesis}
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - genesis-network
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_USER:-genesis} -d ${POSTGRES_DB:-genesis}',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    labels:
+      genesis.service: 'postgres'
+      genesis.layer: 'core'
+      genesis.version: '0.3.0'
+
+  nats:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/nats/Dockerfile
+    image: genesis-nats:local
+    container_name: genesis-nats
+    restart: unless-stopped
+    command: ['-c', '/etc/nats/nats.conf']
+    ports:
+      - '${NATS_PORT:-4222}:4222'
+      - '${NATS_MONITORING_PORT:-8222}:8222'
+    volumes:
+      - nats-data:/data
+    networks:
+      - genesis-network
+    healthcheck:
+      test:
+        ['CMD-SHELL', "wget -qO- http://localhost:8222/healthz | grep -q 'ok'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    labels:
+      genesis.service: 'nats'
+      genesis.layer: 'core'
+      genesis.version: '0.3.0'
+
+  minio:
+    image: minio/minio:latest
+    container_name: genesis-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minio123}
+    ports:
+      - '${MINIO_PORT:-9000}:9000'
+      - '${MINIO_CONSOLE_PORT:-9001}:9001'
+    volumes:
+      - minio-data:/data
+    networks:
+      - genesis-network
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -f http://localhost:9000/minio/health/live']
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    labels:
+      genesis.service: 'minio'
+      genesis.layer: 'core'
+      genesis.version: '0.3.0'
+
+  # =============================================================================
+  # Platform Services
+  # =============================================================================
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: genesis-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-genesis}:${POSTGRES_PASSWORD:-genesis}@genesis-postgres:5432/${POSTGRES_DB:-genesis}
+      - JWT_SECRET=${JWT_SECRET}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+      - GENESIS_ENV=${GENESIS_ENV:-development}
+      - GENESIS_LOG_LEVEL=${GENESIS_LOG_LEVEL:-info}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
+    ports:
+      - '8080:8080'
+    networks:
+      - genesis-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    labels:
+      genesis.service: 'api'
+      genesis.layer: 'platform'
+      genesis.version: '0.3.0'
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    container_name: genesis-worker
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-genesis}:${POSTGRES_PASSWORD:-genesis}@genesis-postgres:5432/${POSTGRES_DB:-genesis}
+      - NATS_URL=nats://genesis-nats:4222
+      - GENESIS_ENV=${GENESIS_ENV:-development}
+      - GENESIS_LOG_LEVEL=${GENESIS_LOG_LEVEL:-info}
+    networks:
+      - genesis-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    labels:
+      genesis.service: 'worker'
+      genesis.layer: 'platform'
+      genesis.version: '0.3.0'

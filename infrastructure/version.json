@@ -1,18 +1,18 @@
 {
-  "version": "0.1.0",
-  "phase": "0.2",
-  "description": "Core infrastructure — Platform Bootstrap",
+  "version": "0.3.0",
+  "phase": "0.3",
+  "description": "Core Platform Foundation — Infrastructure, API, Worker",
   "services": [
     {
       "name": "postgres",
-      "image": "postgres:16-alpine",
+      "image": "genesis-postgres:local (from postgres:16-alpine)",
       "layer": "core",
       "port": 5432,
       "status": "active"
     },
     {
       "name": "nats",
-      "image": "nats:2.10-alpine",
+      "image": "genesis-nats:local (from nats:2.10-alpine)",
       "layer": "core",
       "port": 4222,
       "status": "active"
@@ -23,31 +23,36 @@
       "layer": "core",
       "port": 9000,
       "status": "active"
+    },
+    {
+      "name": "api",
+      "image": "genesis-api (local build)",
+      "layer": "platform",
+      "port": 8080,
+      "status": "active",
+      "note": "FastAPI — auth, workspaces, projects. Runs via docker-compose.platform.yml"
+    },
+    {
+      "name": "worker",
+      "image": "genesis-worker (local build)",
+      "layer": "platform",
+      "port": null,
+      "status": "active",
+      "note": "NATS consumer — stub, no real processing yet. Runs via docker-compose.platform.yml"
     }
   ],
   "planned_services": [
     {
-      "name": "ollama",
-      "layer": "ai",
-      "phase": "1.0",
-      "status": "planned"
-    },
-    {
-      "name": "api",
-      "layer": "platform",
-      "phase": "0.3",
-      "status": "planned"
-    },
-    {
-      "name": "worker",
-      "layer": "platform",
-      "phase": "0.3",
-      "status": "planned"
-    },
-    {
       "name": "web",
       "layer": "platform",
       "phase": "0.4",
+      "status": "in-progress",
+      "note": "Next.js frontend — landing page complete, app not yet wired to API"
+    },
+    {
+      "name": "ollama",
+      "layer": "ai",
+      "phase": "1.0",
       "status": "planned"
     },
     {

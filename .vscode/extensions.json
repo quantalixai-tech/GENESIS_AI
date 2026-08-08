@@ -1,0 +1,20 @@
+{
+  "recommendations": [
+    // TypeScript / JS
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    // Python
+    "ms-python.python",
+    "ms-python.black-formatter",
+    "charliermarsh.ruff",
+    // Docker
+    "ms-azuretools.vscode-docker",
+    // DevContainers
+    "ms-vscode-remote.remote-containers",
+    // Git
+    "eamodio.gitlens",
+    // DX
+    "usernamehw.errorlens",
+    "streetsidesoftware.code-spell-checker"
+  ]
+}

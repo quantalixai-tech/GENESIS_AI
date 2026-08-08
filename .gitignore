@@ -16,6 +16,14 @@ build/
 out/
 .next/
 .turbo/
+# Per-package turbo caches and logs
+**/.turbo/
+# Turbo log files
+**/*.log
+
+# ── Agent Scratch ─────────────────────────────────────────────────────────────
+# AI agent task files — local only, never commit
+task.md
 
 # ── Tooling ───────────────────────────────────────────────────────────────────
 .vercel

@@ -1,3 +1,15 @@
+"""
+Genesis Database Package
+
+Public API for the genesis_db package.
+Import from here, not from sub-modules directly.
+
+Example:
+    import genesis_db
+    user = genesis_db.User(email="...", hashed_password="...")
+"""
+
+from .database import engine, get_session, create_db_and_tables_for_tests
 from .models import (
     User,
     UserBase,
@@ -10,9 +22,23 @@ from .models import (
     ProjectPublic,
     ProjectCreate,
 )
-from .database import engine, get_session, create_db_and_tables
+from .governance import (
+    ModelRegistry,
+    ModelProvider,
+    PromptRegistry,
+    PromptStatus,
+    AgentRegistry,
+    AgentRiskLevel,
+    AIRun,
+    AIRunStatus,
+)
 
 __all__ = [
+    # Database utilities
+    "engine",
+    "get_session",
+    "create_db_and_tables_for_tests",
+    # Core models
     "User",
     "UserBase",
     "UserPublic",
@@ -23,7 +49,13 @@ __all__ = [
     "ProjectBase",
     "ProjectPublic",
     "ProjectCreate",
-    "engine",
-    "get_session",
-    "create_db_and_tables",
+    # Governance models
+    "ModelRegistry",
+    "ModelProvider",
+    "PromptRegistry",
+    "PromptStatus",
+    "AgentRegistry",
+    "AgentRiskLevel",
+    "AIRun",
+    "AIRunStatus",
 ]
