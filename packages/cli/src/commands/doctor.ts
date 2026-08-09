@@ -20,13 +20,13 @@ import {
 import { isDockerRunning, isPortListening, checkApiHealth, REPO_ROOT, ENV_FILE } from '../lib/compose.js';
 
 const REQUIRED_PORTS = [
-  { port: 5432, label: 'PostgreSQL' },
-  { port: 4222, label: 'NATS' },
-  { port: 8222, label: 'NATS Monitor' },
-  { port: 9000, label: 'MinIO API' },
-  { port: 9001, label: 'MinIO Console' },
-  { port: 8080, label: 'Genesis API' },
-  { port: 3000, label: 'Genesis Web' },
+  { port: 5432, label: 'PostgreSQL', hostEnv: 'GENESIS_DEV_SERVICE_HOST' },
+  { port: 4222, label: 'NATS', hostEnv: 'GENESIS_DEV_NATS_HOST' },
+  { port: 8222, label: 'NATS Monitor', hostEnv: 'GENESIS_DEV_NATS_HOST' },
+  { port: 9000, label: 'MinIO', hostEnv: 'GENESIS_DEV_MINIO_HOST' },
+  { port: 9001, label: 'MinIO Console', hostEnv: 'GENESIS_DEV_MINIO_HOST' },
+  { port: 8080, label: 'API (genesis dev)', hostEnv: null },
+  { port: 3000, label: 'Web (genesis dev)', hostEnv: null },
 ];
 
 const MIN_DISK_GB = 5;
@@ -85,15 +85,16 @@ export function registerDoctorCommand(program: Command): void {
       // 5. Core service ports
       logStep('Checking service connectivity');
 
-      for (const { port, label } of REQUIRED_PORTS) {
-        const listening = await isPortListening(port);
+      for (const { port, label, hostEnv } of REQUIRED_PORTS) {
+        const host = (hostEnv ? process.env[hostEnv] : undefined) ?? 'localhost';
+        const listening = await isPortListening(port, host);
         const isRequired = port < 8080; // core infra ports are required; app ports are optional
         if (listening) {
-          logOk(`${label.padEnd(20)} ${c.muted(`localhost:${port}`)}`);
+          logOk(`${label.padEnd(20)} ${c.muted(`${host}:${port}`)}`);
         } else if (isRequired) {
-          logWarn(`${label.padEnd(20)} ${c.muted(`localhost:${port} — not reachable (run: genesis start)`)}`);
+          logWarn(`${label.padEnd(20)} ${c.muted(`${host}:${port} — not reachable (run: genesis start)`)}`);
         } else {
-          logInfo(`${label.padEnd(20)} ${c.muted(`localhost:${port} — not running (optional)`)}`);
+          logInfo(`${label.padEnd(20)} ${c.muted(`${host}:${port} — not running (optional)`)}`);
         }
       }
 

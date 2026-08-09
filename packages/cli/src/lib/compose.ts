@@ -158,10 +158,10 @@ export async function isDockerRunning(): Promise<boolean> {
 /**
  * Check if a TCP port is reachable (service is responding).
  */
-export async function isPortListening(port: number): Promise<boolean> {
+export async function isPortListening(port: number, host: string = 'localhost'): Promise<boolean> {
   const { createConnection } = await import('node:net');
   return new Promise((resolve) => {
-    const socket = createConnection({ port, host: 'localhost' });
+    const socket = createConnection({ port, host });
     socket.once('connect', () => { socket.destroy(); resolve(true); });
     socket.once('error', () => resolve(false));
     socket.setTimeout(1000, () => { socket.destroy(); resolve(false); });
