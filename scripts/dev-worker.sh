@@ -18,7 +18,7 @@ if [[ "$service_host" == "host.docker.internal" ]]; then
   service_host="$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' genesis-postgres)"
 fi
 export DATABASE_URL="postgresql://${POSTGRES_USER:-genesis}:${POSTGRES_PASSWORD:-genesis}@${service_host}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-genesis}"
-nats_host="$service_host"
+nats_host="${GENESIS_DEV_NATS_HOST:-$service_host}"
 if [[ "${GENESIS_DEV_SERVICE_HOST:-localhost}" == "host.docker.internal" ]]; then
   nats_host="$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' genesis-nats)"
 fi

@@ -1,7 +1,11 @@
 {
   "name": "genesis_devcontainer",
-  "image": "mcr.microsoft.com/devcontainers/python:3.11-bookworm",
-  "runArgs": ["--name", "genesis_devcontainer"],
+  "dockerComposeFile": [
+    "../infrastructure/docker/compose/docker-compose.yml",
+    "docker-compose.yml"
+  ],
+  "service": "app",
+  "workspaceFolder": "/workspace",
 
   "features": {
     // Node.js 22 — installs node, npm, nvm
@@ -74,7 +78,9 @@
   // Environment variables available inside the container
   "remoteEnv": {
     "GENESIS_ENV": "development",
-    "GENESIS_DEV_SERVICE_HOST": "host.docker.internal",
+    "GENESIS_DEV_SERVICE_HOST": "postgres",
+    "GENESIS_DEV_NATS_HOST": "nats",
+    "GENESIS_DEV_MINIO_HOST": "minio",
     "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
   }
 }

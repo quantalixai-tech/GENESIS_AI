@@ -4,6 +4,7 @@
 
 # ── Node.js / JS ──────────────────────────────────────────────────────────────
 node_modules/
+.pnpm-store
 .pnp
 .pnp.js
 npm-debug.log*

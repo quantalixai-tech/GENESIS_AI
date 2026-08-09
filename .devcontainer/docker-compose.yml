@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/python:3.11-bookworm
+    init: true
+    command: sleep infinity
+    networks:
+      - genesis-network
+    volumes:
+      - ../../..:/workspace:cached
