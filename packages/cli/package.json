@@ -19,7 +19,14 @@
     "execa": "^9.3.0",
     "ora": "^8.1.1"
   },
-  "keywords": ["genesis", "ai", "cli"],
+  "devDependencies": {
+    "@types/node": "^22.15.3"
+  },
+  "keywords": [
+    "genesis",
+    "ai",
+    "cli"
+  ],
   "engines": {
     "node": ">=18"
   }

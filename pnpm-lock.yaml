@@ -87,6 +87,10 @@ importers:
       ora:
         specifier: ^8.1.1
         version: 8.2.0
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.3
+        version: 22.15.3
 
   packages/eslint-config:
     devDependencies:
