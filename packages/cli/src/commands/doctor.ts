@@ -1,40 +1,127 @@
 /**
  * genesis doctor
  *
- * Run health checks across the entire platform.
- *
- * See: docs/rfc/0004-health.md for the full health specification.
- *
- * Checks (Phase 0.3+):
- *   ✓ Docker — is Docker installed and running?
- *   ✓ PostgreSQL — is the database reachable and healthy?
- *   ✓ NATS — is the event bus reachable and healthy?
- *   ✓ MinIO — is object storage reachable and healthy?
- *   ✓ Disk — is there sufficient disk space?
- *   ✓ Ports — are required ports available?
- *   ✓ GPU — is a GPU available for AI workloads? (optional)
- *   ✓ Models — are required AI models downloaded? (optional)
- *
- * Output format:
- *   ✓ Docker          — running (version 27.x)
- *   ✓ PostgreSQL      — healthy (localhost:5432)
- *   ✓ NATS            — healthy (localhost:4222)
- *   ✓ MinIO           — healthy (localhost:9000)
- *   ✓ Disk            — 120 GB available
- *   ✓ Ports           — all required ports available
- *   ○ GPU             — not available (CPU mode)
- *   ○ Models          — not configured
- *
- * Exit codes:
- *   0 — all required checks pass
- *   1 — one or more required checks failed
+ * Run platform pre-flight health checks.
+ * Checks: Docker, required ports, .env, disk space, API health.
  */
 
-// TODO(phase-0.3): Implement doctor command
-export const doctorCommand = {
-  name: 'doctor',
-  description: 'Run platform health checks',
-  handler: async () => {
-    throw new Error('Not implemented — Phase 0.3');
-  },
-};
+import type { Command } from 'commander';
+import { statfs } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import chalk from 'chalk';
+import {
+  logStep,
+  logOk,
+  logWarn,
+  logErr,
+  logInfo,
+  c,
+} from '../lib/output.js';
+import { isDockerRunning, isPortListening, checkApiHealth, REPO_ROOT, ENV_FILE } from '../lib/compose.js';
+
+const REQUIRED_PORTS = [
+  { port: 5432, label: 'PostgreSQL' },
+  { port: 4222, label: 'NATS' },
+  { port: 8222, label: 'NATS Monitor' },
+  { port: 9000, label: 'MinIO API' },
+  { port: 9001, label: 'MinIO Console' },
+  { port: 8080, label: 'Genesis API' },
+  { port: 3000, label: 'Genesis Web' },
+];
+
+const MIN_DISK_GB = 5;
+
+export function registerDoctorCommand(program: Command): void {
+  program
+    .command('doctor')
+    .description('Run platform health checks')
+    .option('--json', 'Output results as JSON')
+    .action(async (opts: { json: boolean }) => {
+      logStep('Genesis Doctor — Pre-flight Checks');
+
+      const results: Array<{ check: string; ok: boolean; detail: string }> = [];
+
+      const check = (label: string, ok: boolean, detail: string) => {
+        results.push({ check: label, ok, detail });
+        if (ok) {
+          logOk(`${label.padEnd(24)} ${c.muted(detail)}`);
+        } else {
+          logErr(`${label.padEnd(24)} ${c.muted(detail)}`);
+        }
+      };
+
+      // 1. Docker
+      const dockerOk = await isDockerRunning();
+      check('Docker daemon', dockerOk, dockerOk ? 'running' : 'not running — start Docker Desktop');
+
+      // 2. .env file
+      const envOk = existsSync(ENV_FILE);
+      check('.env file', envOk, envOk ? ENV_FILE : 'missing — copy .env.example to .env');
+
+      // 3. JWT_SECRET in .env
+      let jwtOk = false;
+      if (envOk) {
+        const { readFileSync } = await import('node:fs');
+        const env = readFileSync(ENV_FILE, 'utf-8');
+        const match = env.match(/^JWT_SECRET=(.+)$/m);
+        jwtOk = !!(match?.[1]?.trim());
+      }
+      check('JWT_SECRET set', jwtOk, jwtOk ? 'set' : 'missing — set JWT_SECRET in .env');
+
+      // 4. Disk space
+      try {
+        const stats = await statfs(REPO_ROOT);
+        const availableGb = (stats.bfree * stats.bsize) / (1024 ** 3);
+        const diskOk = availableGb >= MIN_DISK_GB;
+        check(
+          'Disk space',
+          diskOk,
+          `${availableGb.toFixed(1)} GB available (need ${MIN_DISK_GB} GB)`,
+        );
+      } catch {
+        check('Disk space', false, 'unable to check');
+      }
+
+      // 5. Core service ports
+      logStep('Checking service connectivity');
+
+      for (const { port, label } of REQUIRED_PORTS) {
+        const listening = await isPortListening(port);
+        const isRequired = port < 8080; // core infra ports are required; app ports are optional
+        if (listening) {
+          logOk(`${label.padEnd(20)} ${c.muted(`localhost:${port}`)}`);
+        } else if (isRequired) {
+          logWarn(`${label.padEnd(20)} ${c.muted(`localhost:${port} — not reachable (run: genesis start)`)}`);
+        } else {
+          logInfo(`${label.padEnd(20)} ${c.muted(`localhost:${port} — not running (optional)`)}`);
+        }
+      }
+
+      // 6. API health check (only if port 8080 is listening)
+      const apiListening = await isPortListening(8080);
+      if (apiListening) {
+        logStep('API Health');
+        const apiHealthy = await checkApiHealth();
+        check('API /health', apiHealthy, apiHealthy ? 'HTTP 200' : 'unhealthy response');
+      }
+
+      // Summary
+      const failed = results.filter((r) => !r.ok);
+      console.log('');
+      if (failed.length === 0) {
+        console.log(chalk.green.bold('  ✓ All checks passed. Platform is ready.'));
+      } else {
+        console.log(chalk.yellow.bold(`  ⚠ ${failed.length} check(s) need attention:`));
+        for (const f of failed) {
+          console.log(`    ${c.err('✗')} ${f.check}: ${c.muted(f.detail)}`);
+        }
+      }
+      console.log('');
+
+      if (opts.json) {
+        process.stdout.write(JSON.stringify(results, null, 2) + '\n');
+      }
+
+      process.exit(failed.some((f) => ['Docker daemon', '.env file', 'JWT_SECRET set'].includes(f.check)) ? 1 : 0);
+    });
+}

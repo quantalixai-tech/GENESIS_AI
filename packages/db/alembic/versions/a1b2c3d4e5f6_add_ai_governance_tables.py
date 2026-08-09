@@ -16,16 +16,16 @@ before any AI agent code is written.
 See: docs/AI_GOVERNANCE.md
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
 
 import sqlalchemy as sa
 import sqlmodel
 from alembic import op
 
 revision: str = "a1b2c3d4e5f6"
-down_revision: Union[str, Sequence[str], None] = "14ef95c22141"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = "14ef95c22141"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -70,7 +70,9 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["model_id"], ["model_registry.id"]),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_prompt_registry_prompt_key"), "prompt_registry", ["prompt_key"], unique=False)
+    op.create_index(
+        op.f("ix_prompt_registry_prompt_key"), "prompt_registry", ["prompt_key"], unique=False
+    )
 
     # -------------------------------------------------------------------------
     # agent_registry
@@ -99,7 +101,9 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("agent_key"),
     )
-    op.create_index(op.f("ix_agent_registry_agent_key"), "agent_registry", ["agent_key"], unique=True)
+    op.create_index(
+        op.f("ix_agent_registry_agent_key"), "agent_registry", ["agent_key"], unique=True
+    )
 
     # -------------------------------------------------------------------------
     # ai_run

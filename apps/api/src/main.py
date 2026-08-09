@@ -21,6 +21,9 @@ Architecture:
         → HTTP Response (with X-Request-ID header)
 """
 
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -33,6 +36,36 @@ from core.middleware import RequestIDMiddleware
 configure_logging(settings.genesis_log_level)
 logger = get_logger(__name__)
 
+
+# ---------------------------------------------------------------------------
+# Lifespan — replaces deprecated @app.on_event("startup/shutdown")
+# ---------------------------------------------------------------------------
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """
+    Application lifespan context manager.
+
+    Code before `yield` runs at startup.
+    Code after `yield` runs at shutdown.
+    """
+    # --- Startup ---
+    logger.info(
+        "Genesis API starting",
+        extra={
+            "environment": settings.genesis_env,
+            "version": "0.3.0",
+            "cors_origins": settings.cors_origins,
+        },
+    )
+
+    yield  # Application runs here
+
+    # --- Shutdown ---
+    logger.info("Genesis API shutting down")
+
+
 # ---------------------------------------------------------------------------
 # Application factory
 # ---------------------------------------------------------------------------
@@ -41,6 +74,7 @@ app = FastAPI(
     title=settings.api_title,
     description=settings.api_description,
     version="0.3.0",
+    lifespan=lifespan,
     # Disable auto-generated docs in production for reduced attack surface
     docs_url="/docs" if not settings.is_production else None,
     redoc_url="/redoc" if not settings.is_production else None,
@@ -77,35 +111,17 @@ app.add_exception_handler(Exception, unhandled_exception_handler)
 
 # System routes (no version prefix — stable contract for infra tooling)
 from api.v1 import health as health_module  # noqa: E402
+
 app.include_router(health_module.router, prefix="/api")
 
 # Versioned API routes
-from api.v1 import auth, workspaces, projects  # noqa: E402
+from api.v1 import auth, projects, workspaces  # noqa: E402
+
 api_v1_prefix = f"/api/{settings.api_version}"
 
 app.include_router(auth.router, prefix=api_v1_prefix)
 app.include_router(workspaces.router, prefix=api_v1_prefix)
 app.include_router(projects.router, prefix=api_v1_prefix)
-
-# ---------------------------------------------------------------------------
-# Startup / shutdown events
-# ---------------------------------------------------------------------------
-
-@app.on_event("startup")
-async def on_startup() -> None:
-    logger.info(
-        "Genesis API starting",
-        extra={
-            "environment": settings.genesis_env,
-            "version": "0.3.0",
-            "cors_origins": settings.cors_origins,
-        },
-    )
-
-
-@app.on_event("shutdown")
-async def on_shutdown() -> None:
-    logger.info("Genesis API shutting down")
 
 
 # ---------------------------------------------------------------------------
@@ -114,6 +130,7 @@ async def on_shutdown() -> None:
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "main:app",
         host="0.0.0.0",

@@ -1,0 +1,42 @@
+# Ignore git and dev environments
+.git
+.gitignore
+.devcontainer
+.vscode
+.cursor
+
+# Ignore local python environments and caches
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+.mypy_cache
+.coverage
+htmlcov
+dist
+build
+*.egg-info
+
+# Ignore node environments and caches
+node_modules
+.npm
+.pnpm-store
+.next
+out
+.turbo
+*.log
+coverage
+
+# Ignore IDE and OS files
+.DS_Store
+Thumbs.db
+.idea
+
+# Ignore environment variables and secrets (except examples)
+.env
+*.pem
+*.key
+
+# Include env examples
+!.env.example

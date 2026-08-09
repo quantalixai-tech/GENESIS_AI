@@ -21,16 +21,15 @@ See docs/AI_GOVERNANCE.md for policies and usage rules.
 """
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any, Optional
 
 from sqlalchemy import func
 from sqlmodel import JSON, Column, DateTime, Field, SQLModel
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 # =============================================================================
@@ -42,14 +41,14 @@ class ModelProvider(StrEnum):
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
     GOOGLE = "google"
-    OLLAMA = "ollama"           # Local model via Ollama
-    CUSTOM = "custom"           # Any other provider
+    OLLAMA = "ollama"  # Local model via Ollama
+    CUSTOM = "custom"  # Any other provider
 
 
 class AgentRiskLevel(StrEnum):
-    LOW = "low"         # Read-only, reversible — no approval needed
-    MEDIUM = "medium"   # Writes data — audit required
-    HIGH = "high"       # Irreversible, external, or destructive — approval required
+    LOW = "low"  # Read-only, reversible — no approval needed
+    MEDIUM = "medium"  # Writes data — audit required
+    HIGH = "high"  # Irreversible, external, or destructive — approval required
     CRITICAL = "critical"  # Production changes — explicit human-in-the-loop
 
 
@@ -103,16 +102,16 @@ class ModelRegistry(SQLModel, table=True):
         max_length=50,
         description="Model version or snapshot (e.g., '2024-11-20')",
     )
-    description: Optional[str] = Field(default=None, max_length=1000)
-    context_window: Optional[int] = Field(
+    description: str | None = Field(default=None, max_length=1000)
+    context_window: int | None = Field(
         default=None,
         description="Maximum context window in tokens",
     )
-    max_output_tokens: Optional[int] = Field(
+    max_output_tokens: int | None = Field(
         default=None,
         description="Maximum output tokens per completion",
     )
-    capabilities: Optional[dict] = Field(
+    capabilities: dict | None = Field(
         default=None,
         sa_column=Column(JSON),
         description="Model capabilities (e.g., vision, function_calling, json_mode)",
@@ -150,13 +149,13 @@ class PromptRegistry(SQLModel, table=True):
     )
     version: int = Field(description="Monotonically increasing version number")
     title: str = Field(max_length=255)
-    description: Optional[str] = Field(
+    description: str | None = Field(
         default=None,
         max_length=1000,
         description="What this prompt does and when it is used",
     )
     content: str = Field(description="The full prompt content")
-    model_id: Optional[uuid.UUID] = Field(
+    model_id: uuid.UUID | None = Field(
         default=None,
         foreign_key="model_registry.id",
         description="Specific model this prompt is optimized for (null = model-agnostic)",
@@ -166,12 +165,12 @@ class PromptRegistry(SQLModel, table=True):
         max_length=50,
         description="draft | active | deprecated | archived",
     )
-    owner: Optional[str] = Field(
+    owner: str | None = Field(
         default=None,
         max_length=100,
         description="Team or service that owns this prompt",
     )
-    evaluation_status: Optional[str] = Field(
+    evaluation_status: str | None = Field(
         default=None,
         max_length=50,
         description="Evaluation result: passed | failed | pending",
@@ -221,27 +220,27 @@ class AgentRegistry(SQLModel, table=True):
         "DATABASE | PLANNER | CODER | TEST | BUILD | DEBUG | REPAIR | "
         "DOCUMENTATION | INDEX | REVIEW | ORCHESTRATOR",
     )
-    description: Optional[str] = Field(default=None, max_length=1000)
+    description: str | None = Field(default=None, max_length=1000)
     purpose: str = Field(
         max_length=500,
         description="What this agent is responsible for",
     )
-    model_id: Optional[uuid.UUID] = Field(
+    model_id: uuid.UUID | None = Field(
         default=None,
         foreign_key="model_registry.id",
         description="Default model for this agent",
     )
-    system_prompt_id: Optional[uuid.UUID] = Field(
+    system_prompt_id: uuid.UUID | None = Field(
         default=None,
         foreign_key="prompt_registry.id",
         description="Default system prompt for this agent",
     )
-    allowed_tools: Optional[list] = Field(
+    allowed_tools: list | None = Field(
         default=None,
         sa_column=Column(JSON),
         description="Explicit list of tool IDs this agent is permitted to use",
     )
-    capabilities: Optional[list] = Field(
+    capabilities: list | None = Field(
         default=None,
         sa_column=Column(JSON),
         description="What this agent can do",
@@ -304,28 +303,28 @@ class AIRun(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
 
     # --- Relationships ---
-    project_id: Optional[uuid.UUID] = Field(
+    project_id: uuid.UUID | None = Field(
         default=None,
         foreign_key="project.id",
         index=True,
         description="Project this run belongs to (null for platform-level runs)",
     )
-    agent_id: Optional[uuid.UUID] = Field(
+    agent_id: uuid.UUID | None = Field(
         default=None,
         foreign_key="agent_registry.id",
         description="Agent that performed this run",
     )
-    model_id: Optional[uuid.UUID] = Field(
+    model_id: uuid.UUID | None = Field(
         default=None,
         foreign_key="model_registry.id",
         description="Model used for this run",
     )
-    prompt_id: Optional[uuid.UUID] = Field(
+    prompt_id: uuid.UUID | None = Field(
         default=None,
         foreign_key="prompt_registry.id",
         description="System prompt used for this run",
     )
-    triggered_by_user_id: Optional[uuid.UUID] = Field(
+    triggered_by_user_id: uuid.UUID | None = Field(
         default=None,
         foreign_key="user.id",
         description="User whose action triggered this run",
@@ -341,58 +340,56 @@ class AIRun(SQLModel, table=True):
         max_length=30,
         index=True,
     )
-    parent_run_id: Optional[uuid.UUID] = Field(
+    parent_run_id: uuid.UUID | None = Field(
         default=None,
         description="Parent AIRun if this is a sub-run of an orchestrated workflow",
     )
 
     # --- Input / Output (non-sensitive summaries only) ---
-    input_summary: Optional[dict] = Field(
+    input_summary: dict | None = Field(
         default=None,
         sa_column=Column(JSON),
         description="Non-sensitive summary of inputs (not full content). "
         "Never store user PII or secrets here.",
     )
-    output_summary: Optional[dict] = Field(
+    output_summary: dict | None = Field(
         default=None,
         sa_column=Column(JSON),
         description="Non-sensitive summary of output. Never store full generated content here "
         "if it contains user data.",
     )
-    tools_used: Optional[list] = Field(
+    tools_used: list | None = Field(
         default=None,
         sa_column=Column(JSON),
         description="List of tool IDs called during this run",
     )
-    error_message: Optional[str] = Field(
+    error_message: str | None = Field(
         default=None,
         max_length=2000,
         description="Error message if status=failed. Sanitized — no stack traces.",
     )
 
     # --- Observability ---
-    duration_ms: Optional[int] = Field(
+    duration_ms: int | None = Field(
         default=None, description="Total execution time in milliseconds"
     )
-    prompt_tokens: Optional[int] = Field(default=None, description="Input token count")
-    completion_tokens: Optional[int] = Field(default=None, description="Output token count")
-    total_tokens: Optional[int] = Field(default=None, description="Total token count")
-    estimated_cost_usd: Optional[float] = Field(
-        default=None, description="Estimated API cost in USD"
-    )
+    prompt_tokens: int | None = Field(default=None, description="Input token count")
+    completion_tokens: int | None = Field(default=None, description="Output token count")
+    total_tokens: int | None = Field(default=None, description="Total token count")
+    estimated_cost_usd: float | None = Field(default=None, description="Estimated API cost in USD")
 
     # --- Governance ---
-    policy_decision: Optional[str] = Field(
+    policy_decision: str | None = Field(
         default=None,
         max_length=50,
         description="allow | deny | require_approval",
     )
-    approval_state: Optional[str] = Field(
+    approval_state: str | None = Field(
         default=None,
         max_length=30,
         description="pending | approved | rejected (null if approval not required)",
     )
-    approved_by_user_id: Optional[uuid.UUID] = Field(
+    approved_by_user_id: uuid.UUID | None = Field(
         default=None,
         description="User who approved this run (if required)",
     )
@@ -402,11 +399,11 @@ class AIRun(SQLModel, table=True):
         default_factory=_utcnow,
         sa_column=Column(DateTime(timezone=True), nullable=False),
     )
-    started_at: Optional[datetime] = Field(
+    started_at: datetime | None = Field(
         default=None,
         sa_column=Column(DateTime(timezone=True), nullable=True),
     )
-    completed_at: Optional[datetime] = Field(
+    completed_at: datetime | None = Field(
         default=None,
         sa_column=Column(DateTime(timezone=True), nullable=True),
     )

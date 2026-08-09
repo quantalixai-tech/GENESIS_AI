@@ -4,21 +4,47 @@ import { Button } from '@genesis/ui';
 import styles from './page.module.css';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
+interface UserResponse {
+  id: string;
+  email: string;
+  created_at: string;
+}
+
+interface WorkspaceResponse {
+  id: string;
+  name: string;
+  user_id: string;
+  created_at: string;
+}
+
+interface ProjectResponse {
+  id: string;
+  name: string;
+  description: string | null;
+  workspace_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export default async function DashboardPage() {
-  let user;
-  let workspaces = [];
-  let projects = [];
+  let user: UserResponse | null = null;
+  let workspaces: WorkspaceResponse[] = [];
+  let projects: ProjectResponse[] = [];
 
   try {
     // 1. Fetch current user
-    user = await fetchServerApi('/auth/me');
-    
+    user = (await fetchServerApi('/auth/me')) as UserResponse;
+
     // 2. Fetch workspaces
-    workspaces = await fetchServerApi('/workspaces');
-    
+    workspaces = (await fetchServerApi('/workspaces')) as WorkspaceResponse[];
+
     // 3. If they have a workspace, fetch projects for the first one
     if (workspaces.length > 0) {
-      projects = await fetchServerApi(`/projects/?workspace_id=${workspaces[0].id}`);
+      projects = (await fetchServerApi(
+        `/projects/?workspace_id=${workspaces[0]?.id ?? ''}`,
+      )) as ProjectResponse[];
     }
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) {
@@ -37,7 +63,7 @@ export default async function DashboardPage() {
           <span className={styles.logo}>⬡</span>
           <span className={styles.brandName}>GENESIS AI</span>
         </div>
-        
+
         <nav className={styles.nav}>
           <Link href="/dashboard" className={`${styles.navItem} ${styles.navItemActive}`}>
             Projects
@@ -46,7 +72,7 @@ export default async function DashboardPage() {
             Settings
           </Link>
         </nav>
-        
+
         <div className={styles.userProfile}>
           <div className={styles.avatar}>
             {user?.email.charAt(0).toUpperCase()}
@@ -81,7 +107,7 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div className={styles.grid}>
-              {projects.map((project: any) => (
+              {projects.map((project) => (
                 <Link href={`/projects/${project.id}`} key={project.id} className={styles.card}>
                   <div className={styles.cardHeader}>
                     <h3 className={styles.cardTitle}>{project.name}</h3>

@@ -30,10 +30,9 @@ from sqlmodel import Session, create_engine
 # DATABASE_URL is the canonical way to configure the connection.
 # In Docker Compose, this is injected via the environment.
 # For local development outside Docker, set it in .env or .env.development.
-DATABASE_URL = os.environ.get(
-    "DATABASE_URL",
-    "postgresql://genesis:genesis@localhost:5432/genesis",
-)
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL environment variable is not set")
 
 engine = create_engine(
     DATABASE_URL,
@@ -59,6 +58,7 @@ def get_session():
 # TEST UTILITY ONLY — never call in production or migration code
 # ---------------------------------------------------------------------------
 
+
 def create_db_and_tables_for_tests() -> None:
     """
     Create all tables directly from SQLModel metadata.
@@ -73,4 +73,5 @@ def create_db_and_tables_for_tests() -> None:
         genesis_db.create_db_and_tables_for_tests()
     """
     from sqlmodel import SQLModel
+
     SQLModel.metadata.create_all(engine)

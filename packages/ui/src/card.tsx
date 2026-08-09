@@ -1,55 +1,53 @@
-import { CSSProperties, ReactNode } from 'react';
+import { HTMLAttributes, AnchorHTMLAttributes, ReactNode } from 'react';
+import styles from './card.module.css';
 
-interface CardProps {
-  children: ReactNode;
+interface CardBaseProps {
   className?: string;
-  style?: CSSProperties;
-  /** Renders the card as an anchor tag. */
-  href?: string;
   /** Hover effect — adds border highlight and slight lift. */
   interactive?: boolean;
   padding?: 'sm' | 'md' | 'lg' | 'none';
 }
 
-const paddingMap = {
-  none: '0',
-  sm: '1rem',
-  md: '1.5rem',
-  lg: '2rem',
-};
+interface CardAsDivProps extends CardBaseProps, HTMLAttributes<HTMLDivElement> {
+  href?: never;
+}
 
-const baseStyle: CSSProperties = {
-  background: '#16161f',
-  border: '1px solid rgba(255, 255, 255, 0.08)',
-  borderRadius: '12px',
-  display: 'block',
-  textDecoration: 'none',
-  color: 'inherit',
-  transition: 'border-color 0.2s ease, transform 0.2s ease',
+interface CardAsAnchorProps extends CardBaseProps, AnchorHTMLAttributes<HTMLAnchorElement> {
+  href: string;
+}
+
+type CardProps = CardAsDivProps | CardAsAnchorProps;
+
+const getPaddingClass = (padding: string) => {
+  switch (padding) {
+    case 'none': return styles.paddingNone;
+    case 'sm': return styles.paddingSm;
+    case 'md': return styles.paddingMd;
+    case 'lg': return styles.paddingLg;
+    default: return styles.paddingMd;
+  }
 };
 
 export function Card({
   children,
-  className,
-  style,
+  className = '',
   href,
   interactive = false,
   padding = 'md',
+  ...rest
 }: CardProps): React.JSX.Element {
-  const cardStyle: CSSProperties = {
-    ...baseStyle,
-    padding: paddingMap[padding],
-    cursor: href || interactive ? 'pointer' : undefined,
-    ...style,
-  };
+  const baseClasses = styles.base;
+  const paddingClass = getPaddingClass(padding);
+  const interactiveClasses = interactive || href ? styles.interactive : '';
+  const combinedClasses = `${baseClasses} ${paddingClass} ${interactiveClasses} ${className}`.trim();
 
   if (href) {
     return (
       <a
         href={href}
-        className={className}
-        style={cardStyle}
+        className={combinedClasses}
         rel="noopener noreferrer"
+        {...(rest as AnchorHTMLAttributes<HTMLAnchorElement>)}
       >
         {children}
       </a>
@@ -57,7 +55,7 @@ export function Card({
   }
 
   return (
-    <div className={className} style={cardStyle}>
+    <div className={combinedClasses} {...(rest as HTMLAttributes<HTMLDivElement>)}>
       {children}
     </div>
   );

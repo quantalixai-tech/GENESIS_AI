@@ -1,0 +1,15 @@
+@reference "tailwindcss";
+@reference "@repo/tailwind-config/theme.css";
+
+.base {
+  @apply block bg-[#16161f] border border-[rgba(255,255,255,0.08)] rounded-xl text-inherit transition-all duration-200;
+}
+
+.interactive {
+  @apply cursor-pointer hover:border-[rgba(255,255,255,0.15)] hover:-translate-y-0.5;
+}
+
+.paddingNone { @apply p-0; }
+.paddingSm { @apply p-4; }
+.paddingMd { @apply p-6; }
+.paddingLg { @apply p-8; }

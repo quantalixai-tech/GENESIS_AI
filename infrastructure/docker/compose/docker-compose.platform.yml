@@ -1,35 +1,99 @@
+# =============================================================================
+# Genesis — Platform Services Layer
+#
+# Services: API · Worker · Web
+#
+# Usage (with core infrastructure):
+#   docker compose \
+#     -f infrastructure/docker/compose/docker-compose.yml \
+#     -f infrastructure/docker/compose/docker-compose.platform.yml \
+#     up -d --build
+#
+# Or from the repo root: docker compose up -d --build
+# =============================================================================
+
+name: genesis
+
 services:
+  # ---------------------------------------------------------------------------
+  # FastAPI — Genesis REST API
+  # Image: genesis-api (local build)
+  # ---------------------------------------------------------------------------
   genesis-api:
     build:
       context: ../../../
       dockerfile: apps/api/Dockerfile
+    image: genesis-api:local
     container_name: genesis-api
     restart: unless-stopped
     env_file:
       - ../../../.env
     environment:
+      # Inside Docker, postgres refers to the genesis-postgres container hostname
       - DATABASE_URL=postgresql://${POSTGRES_USER:-genesis}:${POSTGRES_PASSWORD:-genesis}@genesis-postgres:5432/${POSTGRES_DB:-genesis}
       - JWT_SECRET=${JWT_SECRET}
       - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
       - GENESIS_ENV=${GENESIS_ENV:-development}
       - GENESIS_LOG_LEVEL=${GENESIS_LOG_LEVEL:-info}
+      # Allow requests from the web frontend (both local and container origins)
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
     ports:
-      - "8080:8080"
+      - '${API_PORT:-8080}:8080'
     networks:
       - genesis-network
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -f http://localhost:8080/api/health || exit 1']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     labels:
-      - "genesis.layer=platform"
-      - "genesis.service=api"
-      - "genesis.version=0.3.0"
+      - 'genesis.layer=platform'
+      - 'genesis.service=api'
+      - 'genesis.version=0.3.0'
 
+  # ---------------------------------------------------------------------------
+  # Next.js — Genesis Web Frontend
+  # Image: genesis-web (local build)
+  # ---------------------------------------------------------------------------
+  genesis-web:
+    build:
+      context: ../../../
+      dockerfile: apps/web/Dockerfile
+    image: genesis-web:local
+    container_name: genesis-web
+    restart: unless-stopped
+    env_file:
+      - ../../../.env
+    environment:
+      # Client-side URL: always the public-facing host where users' browsers reach the API
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8080/api/v1}
+      # Server-side URL: inside Docker, use the container service name for SSR calls
+      - API_URL=http://genesis-api:8080/api/v1
+    ports:
+      - '${WEB_PORT:-3000}:3000'
+    networks:
+      - genesis-network
+    depends_on:
+      genesis-api:
+        condition: service_healthy
+    labels:
+      - 'genesis.layer=platform'
+      - 'genesis.service=web'
+      - 'genesis.version=0.3.0'
+
+  # ---------------------------------------------------------------------------
+  # NATS Consumer Worker
+  # Image: genesis-worker (local build)
+  # ---------------------------------------------------------------------------
   genesis-worker:
     build:
       context: ../../../
       dockerfile: apps/worker/Dockerfile
+    image: genesis-worker:local
     container_name: genesis-worker
     restart: unless-stopped
     env_file:
@@ -37,6 +101,8 @@ services:
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-genesis}:${POSTGRES_PASSWORD:-genesis}@genesis-postgres:5432/${POSTGRES_DB:-genesis}
       - NATS_URL=nats://genesis-nats:4222
+      - GENESIS_ENV=${GENESIS_ENV:-development}
+      - GENESIS_LOG_LEVEL=${GENESIS_LOG_LEVEL:-info}
     networks:
       - genesis-network
     depends_on:
@@ -45,9 +111,9 @@ services:
       nats:
         condition: service_healthy
     labels:
-      - "genesis.layer=platform"
-      - "genesis.service=worker"
-      - "genesis.version=0.3.0"
+      - 'genesis.layer=platform'
+      - 'genesis.service=worker'
+      - 'genesis.version=0.3.0'
 
 networks:
   genesis-network:

@@ -135,6 +135,7 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+    image: genesis-api:local
     container_name: genesis-api
     restart: unless-stopped
     env_file:
@@ -147,12 +148,18 @@ services:
       - GENESIS_LOG_LEVEL=${GENESIS_LOG_LEVEL:-info}
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
     ports:
-      - '8080:8080'
+      - '${API_PORT:-8080}:8080'
     networks:
       - genesis-network
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -f http://localhost:8080/api/health || exit 1']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     labels:
       genesis.service: 'api'
       genesis.layer: 'platform'
@@ -162,6 +169,7 @@ services:
     build:
       context: .
       dockerfile: apps/worker/Dockerfile
+    image: genesis-worker:local
     container_name: genesis-worker
     restart: unless-stopped
     env_file:
@@ -180,5 +188,31 @@ services:
         condition: service_healthy
     labels:
       genesis.service: 'worker'
+      genesis.layer: 'platform'
+      genesis.version: '0.3.0'
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    image: genesis-web:local
+    container_name: genesis-web
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Client-side (browser) — must point to host-accessible URL
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8080/api/v1}
+      # Server-side (SSR within Docker network) — uses container service name
+      - API_URL=http://api:8080/api/v1
+    ports:
+      - '${WEB_PORT:-3000}:3000'
+    networks:
+      - genesis-network
+    depends_on:
+      api:
+        condition: service_healthy
+    labels:
+      genesis.service: 'web'
       genesis.layer: 'platform'
       genesis.version: '0.3.0'

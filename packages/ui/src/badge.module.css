@@ -1,0 +1,30 @@
+@reference "tailwindcss";
+@reference "@repo/tailwind-config/theme.css";
+
+.base {
+  @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[0.7rem] font-semibold tracking-[0.05em] uppercase whitespace-nowrap;
+}
+
+.active {
+  @apply bg-[rgba(16,185,129,0.1)] text-[#10b981] border border-[rgba(16,185,129,0.2)];
+}
+
+.planned {
+  @apply bg-[rgba(71,85,105,0.1)] text-[#64748b] border border-[rgba(71,85,105,0.2)];
+}
+
+.error {
+  @apply bg-[rgba(239,68,68,0.1)] text-[#ef4444] border border-[rgba(239,68,68,0.2)];
+}
+
+.warning {
+  @apply bg-[rgba(245,158,11,0.1)] text-[#f59e0b] border border-[rgba(245,158,11,0.2)];
+}
+
+.neutral {
+  @apply bg-[rgba(255,255,255,0.04)] text-[#94a3b8] border border-[rgba(255,255,255,0.08)];
+}
+
+.info {
+  @apply bg-[rgba(99,102,241,0.1)] text-[#818cf8] border border-[rgba(99,102,241,0.2)];
+}

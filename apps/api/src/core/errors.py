@@ -24,7 +24,6 @@ DO NOT leak:
 """
 
 from enum import StrEnum
-from typing import Any
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
@@ -139,7 +138,9 @@ class ValidationError(GenesisError):
 
 
 class UnauthorizedError(GenesisError):
-    def __init__(self, message: str = "Unauthorized", code: ErrorCode = ErrorCode.UNAUTHORIZED) -> None:
+    def __init__(
+        self, message: str = "Unauthorized", code: ErrorCode = ErrorCode.UNAUTHORIZED
+    ) -> None:
         super().__init__(message, code=code, http_status=401)
 
 
@@ -169,9 +170,7 @@ def make_error_response(
     details: list[ErrorDetail] | None = None,
 ) -> JSONResponse:
     """Construct a JSONResponse with the standard Genesis error envelope."""
-    body = ErrorResponse(
-        error=ErrorBody(code=code, message=message, details=details)
-    )
+    body = ErrorResponse(error=ErrorBody(code=code, message=message, details=details))
     return JSONResponse(status_code=http_status, content=body.model_dump(exclude_none=True))
 
 
@@ -191,14 +190,15 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
     Logs the full exception but returns a generic error to the client.
     DO NOT leak exception details to the client in production.
     """
-    from core.logging import get_logger
     from core.config import settings
+    from core.logging import get_logger
 
     logger = get_logger(__name__)
     logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
 
     message = (
-        str(exc) if settings.is_development
+        str(exc)
+        if settings.is_development
         else "An unexpected error occurred. Please try again later."
     )
 

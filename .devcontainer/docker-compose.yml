@@ -1,4 +1,24 @@
-version: '3.8'
+# DevContainer service definition
+#
+# This file extends the core infrastructure compose (docker-compose.yml) with
+# the 'app' development container that VS Code attaches to.
+#
+# IMPORTANT: Do NOT declare the workspace volume here.
+# VS Code DevContainers injects the workspace mount automatically via
+# the 'workspaceMount' and 'workspaceFolder' settings in devcontainer.json.
+# Declaring it here causes Docker Compose to resolve relative paths against
+# the wrong compose file, mounting the wrong directory.
+#
+# Architecture:
+#   app      — VS Code IDE container with Python + Node + Docker CLI
+#              Developers run 'genesis dev' inside this container to start
+#              API and web as hot-reload PROCESSES (not Docker containers).
+#   postgres — Shared with core infrastructure compose
+#   nats     — Shared with core infrastructure compose
+#   minio    — Shared with core infrastructure compose
+#
+# The genesis-network is defined in docker-compose.yml.
+# Docker Compose merges both files and creates it automatically.
 
 services:
   app:
@@ -7,5 +27,9 @@ services:
     command: sleep infinity
     networks:
       - genesis-network
+    ports:
+      # Forward dev process ports so host browser reaches processes inside container
+      - "8080:8080"   # genesis dev --api  (uvicorn)
+      - "3000:3000"   # genesis dev --web  (Next.js)
     volumes:
-      - ../../..:/workspace:cached
+      - ${LOCAL_WORKSPACE_FOLDER:-../../../}:/workspace:cached

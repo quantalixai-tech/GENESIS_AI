@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { API_BASE_URL } from '../../../../lib/api';
+import { SERVER_API_URL } from '../../../../lib/api';
 
 export async function POST(request: Request, { params }: { params: Promise<{ route: string[] }> }) {
   const resolvedParams = await params;
@@ -31,7 +31,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ rou
         fetchOptions.body = JSON.stringify(body);
       }
 
-      const res = await fetch(`${API_BASE_URL}/auth/${route}`, fetchOptions);
+      const res = await fetch(`${SERVER_API_URL}/auth/${route}`, fetchOptions);
       const data = await res.json();
 
       if (!res.ok) {

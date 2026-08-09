@@ -7,10 +7,8 @@ Separated from DB models to decouple the API contract from the database schema.
 
 import uuid
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, Field
-
 
 # =============================================================================
 # Workspace schemas
@@ -54,7 +52,7 @@ class ProjectCreateRequest(BaseModel):
         description="Project name.",
         examples=["My Portfolio Website"],
     )
-    description: Optional[str] = Field(
+    description: str | None = Field(
         default=None,
         max_length=2000,
         description="Optional project description.",
@@ -67,7 +65,7 @@ class ProjectResponse(BaseModel):
     id: uuid.UUID
     workspace_id: uuid.UUID
     name: str
-    description: Optional[str]
+    description: str | None
     created_at: datetime
     updated_at: datetime
 

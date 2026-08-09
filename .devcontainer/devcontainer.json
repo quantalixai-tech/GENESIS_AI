@@ -6,45 +6,25 @@
   ],
   "service": "app",
   "workspaceFolder": "/workspace",
-
   "features": {
-    // Node.js 22 — installs node, npm, nvm
     "ghcr.io/devcontainers/features/node:1": {
       "version": "22",
       "nodeGypDependencies": false
     },
-    // Docker-from-Docker — allows running Docker Compose by using the host's docker daemon
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
       "version": "latest",
       "moby": true
     }
   },
-
-  // Install pnpm and uv after base image is configured
-  "onCreateCommand": "npm install -g pnpm@9 && curl -LsSf https://astral.sh/uv/install.sh | sh",
-
-  // Install all project dependencies after the workspace is attached
-  "postCreateCommand": "bash .devcontainer/post-create.sh",
-
-  // Forward all development ports
-  "forwardPorts": [
-    3000, // Next.js web
-    8080, // FastAPI API
-    5432, // PostgreSQL
-    4222, // NATS
-    8222, // NATS monitoring
-    9000, // MinIO API
-    9001 // MinIO console
-  ],
-
+  "postCreateCommand": "bash /workspace/.devcontainer/post-create.sh",
+  "forwardPorts": [3000, 8080, 5432, 4222, 8222, 9000, 9001],
   "portsAttributes": {
-    "3000": { "label": "Web", "onAutoForward": "notify" },
-    "8080": { "label": "API", "onAutoForward": "notify" },
+    "3000": { "label": "Web (genesis dev)", "onAutoForward": "openBrowser" },
+    "8080": { "label": "API (genesis dev)", "onAutoForward": "notify" },
     "5432": { "label": "PostgreSQL" },
     "4222": { "label": "NATS" },
     "9000": { "label": "MinIO" }
   },
-
   "customizations": {
     "vscode": {
       "extensions": [
@@ -59,28 +39,28 @@
         "streetsidesoftware.code-spell-checker"
       ],
       "settings": {
-        "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
+        "python.defaultInterpreterPath": "/workspace/.venv/bin/python",
         "python.analysis.extraPaths": [
-          "${containerWorkspaceFolder}/packages/db",
-          "${containerWorkspaceFolder}/apps/api/src",
-          "${containerWorkspaceFolder}/apps/worker/src"
+          "/workspace/packages/db",
+          "/workspace/apps/api/src",
+          "/workspace/apps/worker/src"
         ],
         "python.analysis.typeCheckingMode": "basic",
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "[python]": {
           "editor.defaultFormatter": "ms-python.black-formatter"
-        }
+        },
+        "terminal.integrated.cwd": "/workspace"
       }
     }
   },
-
-  // Environment variables available inside the container
   "remoteEnv": {
     "GENESIS_ENV": "development",
     "GENESIS_DEV_SERVICE_HOST": "postgres",
     "GENESIS_DEV_NATS_HOST": "nats",
     "GENESIS_DEV_MINIO_HOST": "minio",
-    "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
+    "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
+    "PATH": "${containerEnv:PATH}:/root/.local/bin:/home/vscode/.local/bin:/workspace/node_modules/.bin:/workspace/.venv/bin"
   }
 }

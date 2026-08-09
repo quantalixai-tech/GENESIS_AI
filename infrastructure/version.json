@@ -1,7 +1,7 @@
 {
-  "version": "0.3.0",
-  "phase": "0.3",
-  "description": "Core Platform Foundation — Infrastructure, API, Worker",
+  "version": "0.4.0",
+  "phase": "0.4",
+  "description": "Core Platform Foundation — Infrastructure, API, Worker, Web Frontend",
   "services": [
     {
       "name": "postgres",
@@ -26,31 +26,38 @@
     },
     {
       "name": "api",
-      "image": "genesis-api (local build)",
+      "image": "genesis-api:local (local build)",
       "layer": "platform",
       "port": 8080,
       "status": "active",
-      "note": "FastAPI — auth, workspaces, projects. Runs via docker-compose.platform.yml"
+      "note": "FastAPI — auth, workspaces, projects. Service layer, structured errors, request tracing, JWT auth."
     },
     {
       "name": "worker",
-      "image": "genesis-worker (local build)",
+      "image": "genesis-worker:local (local build)",
       "layer": "platform",
       "port": null,
       "status": "active",
-      "note": "NATS consumer — stub, no real processing yet. Runs via docker-compose.platform.yml"
+      "note": "NATS consumer — stub, no real processing yet."
+    },
+    {
+      "name": "web",
+      "image": "genesis-web:local (local build)",
+      "layer": "platform",
+      "port": 3000,
+      "status": "active",
+      "note": "Next.js 16 frontend — landing page live, CSS modules + Tailwind v4, auth pages in progress."
     }
   ],
   "planned_services": [
     {
-      "name": "web",
-      "layer": "platform",
-      "phase": "0.4",
-      "status": "in-progress",
-      "note": "Next.js frontend — landing page complete, app not yet wired to API"
+      "name": "ollama",
+      "layer": "ai",
+      "phase": "1.0",
+      "status": "planned"
     },
     {
-      "name": "ollama",
+      "name": "model-router",
       "layer": "ai",
       "phase": "1.0",
       "status": "planned"
@@ -63,6 +70,12 @@
     },
     {
       "name": "grafana",
+      "layer": "observability",
+      "phase": "1.0",
+      "status": "planned"
+    },
+    {
+      "name": "loki",
       "layer": "observability",
       "phase": "1.0",
       "status": "planned"

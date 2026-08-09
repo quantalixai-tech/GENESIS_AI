@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { API_BASE_URL } from '../../../../lib/api';
+import { SERVER_API_URL } from '../../../../lib/api';
 
 async function handleRequest(request: Request, { params }: { params: Promise<{ route: string[] }> }) {
   const resolvedParams = await params;
@@ -33,7 +33,7 @@ async function handleRequest(request: Request, { params }: { params: Promise<{ r
       }
     }
 
-    const res = await fetch(`${API_BASE_URL}/${route}${searchParams}`, fetchOptions);
+    const res = await fetch(`${SERVER_API_URL}/${route}${searchParams}`, fetchOptions);
     
     // Copy headers from response
     const responseHeaders = new Headers();

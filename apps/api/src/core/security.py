@@ -17,10 +17,10 @@ Security properties:
       error — no information about *why* the token was rejected is exposed
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from pydantic import BaseModel
@@ -28,6 +28,7 @@ from sqlmodel import Session
 
 import genesis_db
 from core.config import settings
+from core.errors import ErrorCode, UnauthorizedError
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
@@ -60,7 +61,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     """
     to_encode = data.copy()
     expire_delta = expires_delta or timedelta(minutes=settings.access_token_expire_minutes)
-    expire = datetime.now(timezone.utc) + expire_delta
+    expire = datetime.now(UTC) + expire_delta
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
@@ -73,15 +74,15 @@ def get_current_user(
     FastAPI dependency: decode the JWT and return the authenticated User.
 
     Raises:
-        HTTP 401 — if the token is missing, malformed, expired, or the user
-                   no longer exists. The error detail is intentionally generic
-                   to avoid leaking token validity information.
+        UnauthorizedError — if the token is missing, malformed, expired, or the
+                            user no longer exists. The error detail is intentionally
+                            generic to avoid leaking token validity information.
     """
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
+    _credentials_error = UnauthorizedError(
+        "Could not validate credentials.",
+        code=ErrorCode.TOKEN_INVALID,
     )
+
     try:
         payload = jwt.decode(
             token,
@@ -90,14 +91,18 @@ def get_current_user(
         )
         user_id: str | None = payload.get("sub")
         if user_id is None:
-            raise credentials_exception
+            raise _credentials_error
         token_data = TokenData(user_id=user_id)
-    except jwt.ExpiredSignatureError:
-        raise credentials_exception
-    except jwt.PyJWTError:
-        raise credentials_exception
+    except jwt.ExpiredSignatureError as exc:
+        raise UnauthorizedError(
+            "Token has expired. Please log in again.",
+            code=ErrorCode.TOKEN_EXPIRED,
+        ) from exc
+    except jwt.PyJWTError as exc:
+        raise _credentials_error from exc
 
     user = session.get(genesis_db.User, token_data.user_id)
     if user is None:
-        raise credentials_exception
+        raise _credentials_error
+
     return user

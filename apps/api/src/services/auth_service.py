@@ -19,8 +19,6 @@ Raising:
     UnauthorizedError — invalid credentials
 """
 
-from datetime import datetime, timezone
-
 from sqlmodel import Session, select
 
 import genesis_db
@@ -87,9 +85,7 @@ def authenticate_user(session: Session, email: str, password: str) -> tuple[gene
         UnauthorizedError: If credentials are invalid. The error message is
             intentionally generic to avoid revealing whether the email exists.
     """
-    user = session.exec(
-        select(genesis_db.User).where(genesis_db.User.email == email)
-    ).first()
+    user = session.exec(select(genesis_db.User).where(genesis_db.User.email == email)).first()
 
     if not user or not verify_password(password, user.hashed_password):
         # NOTE: same error for "user not found" and "wrong password" — prevents

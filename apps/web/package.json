@@ -4,11 +4,11 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3000",
+    "dev": "next dev -H 0.0.0.0 --port 3000",
     "build": "next build",
     "start": "next start",
     "lint": "eslint --max-warnings 0",
-    "check-types": "next typegen && tsc --noEmit"
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@genesis/ui": "workspace:*",
@@ -18,11 +18,15 @@
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
+    "@repo/tailwind-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@tailwindcss/postcss": "4.3.3",
     "@types/node": "^22.15.3",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
     "eslint": "^9.39.1",
+    "postcss": "^8.4.38",
+    "tailwindcss": "4.3.3",
     "typescript": "5.9.2"
   }
 }

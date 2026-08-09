@@ -2,7 +2,12 @@
 Genesis API — Health Check
 
 Returns the actual health of all critical platform dependencies.
-DO NOT return hardcoded "connected" — load balancers and monitors rely on this.
+
+HTTP 200 = all checks passed → service is healthy
+HTTP 503 = one or more critical dependencies are unavailable → service degraded
+
+DO NOT return hardcoded "connected" — load balancers and monitors rely on
+this endpoint to route traffic and trigger alerts.
 
 Checks performed:
     - Database: executes SELECT 1 to verify connectivity
@@ -13,6 +18,7 @@ Future checks to add when services are integrated:
 """
 
 from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlmodel import Session
 
@@ -25,7 +31,7 @@ logger = get_logger(__name__)
 
 
 @router.get("/health", summary="Health check")
-def health_check() -> dict:
+def health_check() -> JSONResponse:
     """
     Return the health status of the Genesis API and its dependencies.
 
@@ -34,6 +40,7 @@ def health_check() -> dict:
     """
     db_status = "unknown"
     overall_status = "ok"
+    http_status = 200
 
     # --- Database check ---
     try:
@@ -41,11 +48,15 @@ def health_check() -> dict:
             session.exec(text("SELECT 1"))  # type: ignore[call-overload]
         db_status = "connected"
     except Exception as exc:
-        logger.error("Health check: database connectivity failure", extra={"error": str(exc)})
+        logger.error(
+            "Health check: database connectivity failure",
+            extra={"error": str(exc)},
+        )
         db_status = "unreachable"
         overall_status = "degraded"
+        http_status = 503
 
-    return {
+    body = {
         "status": overall_status,
         "version": "0.3.0",
         "environment": settings.genesis_env,
@@ -53,3 +64,5 @@ def health_check() -> dict:
             "database": db_status,
         },
     }
+
+    return JSONResponse(content=body, status_code=http_status)

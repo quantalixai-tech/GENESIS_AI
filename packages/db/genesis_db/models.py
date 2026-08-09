@@ -6,7 +6,7 @@ Defines the foundational database models for the Genesis platform.
 Model layers:
     *Base     — Shared fields for Pydantic validation (no table=True)
     *Table    — Database table model (table=True)
-    
+
     These are separate from API schemas in apps/api/src/schemas/.
     API response shapes are defined there; DB shapes are defined here.
 
@@ -31,8 +31,7 @@ Future tables (defined in docs/BACKEND_SCHEMA.md):
 """
 
 import uuid
-from datetime import datetime, timezone
-from typing import List, Optional
+from datetime import UTC, datetime
 
 from sqlalchemy import func
 from sqlmodel import Column, DateTime, Field, Relationship, SQLModel
@@ -40,7 +39,7 @@ from sqlmodel import Column, DateTime, Field, Relationship, SQLModel
 
 def _utcnow() -> datetime:
     """Return the current UTC time as a timezone-aware datetime."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 # =============================================================================
@@ -71,7 +70,7 @@ class User(UserBase, table=True):
         ),
     )
 
-    workspaces: List["Workspace"] = Relationship(back_populates="user")
+    workspaces: list["Workspace"] = Relationship(back_populates="user")
 
 
 class UserPublic(UserBase):
@@ -113,7 +112,7 @@ class Workspace(WorkspaceBase, table=True):
     )
 
     user: User = Relationship(back_populates="workspaces")
-    projects: List["Project"] = Relationship(back_populates="workspace", cascade_delete=True)
+    projects: list["Project"] = Relationship(back_populates="workspace", cascade_delete=True)
 
 
 class WorkspacePublic(WorkspaceBase):
@@ -133,7 +132,7 @@ class WorkspacePublic(WorkspaceBase):
 
 class ProjectBase(SQLModel):
     name: str = Field(max_length=255)
-    description: Optional[str] = Field(default=None, max_length=2000)
+    description: str | None = Field(default=None, max_length=2000)
 
 
 class Project(ProjectBase, table=True):

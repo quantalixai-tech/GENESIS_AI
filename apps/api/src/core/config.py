@@ -21,7 +21,8 @@ Optional environment variables (safe defaults for development):
 
 from functools import lru_cache
 from typing import Literal
-from pydantic import Field, field_validator
+
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -68,7 +69,7 @@ class Settings(BaseSettings):
     # -------------------------------------------------------------------------
     jwt_secret: str = Field(
         description="Secret key for signing JWT access tokens. REQUIRED. "
-        "Generate with: python -c \"import secrets; print(secrets.token_hex(32))\"",
+        'Generate with: python -c "import secrets; print(secrets.token_hex(32))"',
     )
     jwt_algorithm: str = Field(
         default="HS256",
@@ -96,11 +97,7 @@ class Settings(BaseSettings):
     @property
     def cors_origins(self) -> list[str]:
         """Return CORS origins as a list, split from the comma-separated env var."""
-        return [
-            origin.strip()
-            for origin in self.cors_origins_raw.split(",")
-            if origin.strip()
-        ]
+        return [origin.strip() for origin in self.cors_origins_raw.split(",") if origin.strip()]
 
     # -------------------------------------------------------------------------
     # API
