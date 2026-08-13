@@ -1,5 +1,4 @@
-@reference "tailwindcss";
-@reference "@repo/tailwind-config/theme.css";
+@reference "../../../../../apps/web/app/globals.css";
 
 .root {
   @apply rounded-xl border border-red-500/25 bg-red-500/[0.06] p-4 flex flex-col gap-3;

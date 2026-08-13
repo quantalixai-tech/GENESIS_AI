@@ -1,5 +1,4 @@
-@reference "tailwindcss";
-@reference "@repo/tailwind-config/theme.css";
+@reference "../../../../../apps/web/app/globals.css";
 
 .root {
   @apply flex flex-col gap-1.5;
@@ -8,30 +7,22 @@
 /* ── Label ───────────────────────────────────────────────────────────────── */
 
 .label {
-  @apply text-sm font-medium text-[var(--color-text-primary)];
+  @apply text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70;
 }
 
 .required {
-  @apply text-red-400;
+  @apply text-destructive ml-1;
 }
 
 /* ── Field wrapper ───────────────────────────────────────────────────────── */
 
 .fieldWrapper {
-  @apply relative flex items-center rounded-xl border border-[var(--color-border)]
-         bg-white/[0.03] transition-all duration-150;
-}
-
-.fieldWrapper:focus-within {
-  @apply border-[var(--color-primary)] shadow-[0_0_0_3px_var(--color-primary-glow)];
+  @apply relative flex items-center rounded-md border border-input bg-background
+         transition-colors duration-200 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2;
 }
 
 .fieldWrapperError {
-  @apply border-red-500/50;
-}
-
-.fieldWrapperError:focus-within {
-  @apply border-red-500 shadow-[0_0_0_3px_rgba(239,68,68,0.15)];
+  @apply border-destructive focus-within:ring-destructive;
 }
 
 .fieldWrapperDisabled {
@@ -41,9 +32,8 @@
 /* ── Input element ───────────────────────────────────────────────────────── */
 
 .input {
-  @apply flex-1 min-w-0 bg-transparent px-3.5 py-2.5 text-sm
-         text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]
-         outline-none border-none;
+  @apply flex h-10 w-full bg-transparent px-3 py-2 text-sm
+         placeholder:text-muted-foreground outline-none border-none;
 }
 
 .input:disabled {
@@ -56,19 +46,19 @@
 /* ── Adornments ──────────────────────────────────────────────────────────── */
 
 .leadingIcon {
-  @apply pl-3.5 text-[var(--color-text-muted)] flex items-center shrink-0;
+  @apply pl-3 text-muted-foreground flex items-center shrink-0;
 }
 
 .trailingElement {
-  @apply pr-3 flex items-center shrink-0 text-[var(--color-text-muted)];
+  @apply pr-3 flex items-center shrink-0 text-muted-foreground;
 }
 
 /* ── Sub-label text ──────────────────────────────────────────────────────── */
 
 .helperText {
-  @apply text-xs text-[var(--color-text-muted)] m-0;
+  @apply text-[0.8rem] text-muted-foreground m-0;
 }
 
 .errorText {
-  @apply text-xs text-red-400 m-0;
+  @apply text-[0.8rem] font-medium text-destructive m-0;
 }

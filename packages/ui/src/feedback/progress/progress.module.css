@@ -1,5 +1,4 @@
-@reference "tailwindcss";
-@reference "@repo/tailwind-config/theme.css";
+@reference "../../../../../apps/web/app/globals.css";
 
 .root {
   @apply w-full flex flex-col gap-1.5;

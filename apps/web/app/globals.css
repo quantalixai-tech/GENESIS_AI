@@ -7,17 +7,10 @@
   --font-mono: var(--font-geist-mono), "Courier New", monospace;
 }
 
-:root {
-  /* Genesis Design Tokens mapped to existing inline usages */
-  --color-bg: var(--color-bg-base);
-  --color-bg-secondary: #111118;
-  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), "Courier New", monospace;
-}
 
 body {
-  background-color: var(--color-bg);
-  color: var(--color-text-primary);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
   font-family: var(--font-sans);
   line-height: 1.6;
   min-height: 100vh;

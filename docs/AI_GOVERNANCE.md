@@ -368,4 +368,17 @@ Before merging any AI feature:
 
 ---
 
+# 13. UI & Frontend Governance
+
+## 13.1 Design System & Styling
+
+To ensure a unified, maintainable, and highly aesthetic frontend experience, all AI-generated UI code MUST adhere to the following styling constraints:
+
+- **Strict CSS Modules with Tailwind:** All component styling must use CSS Modules (`*.module.css`) utilizing the `@apply` directive for Tailwind utility classes.
+- **Reference Resolution:** Every CSS Module must import the global theme via `@reference` pointing accurately to the `globals.css` (e.g., `@reference "../../../globals.css";`).
+- **No Inline Tailwind or Utility Clutter:** Do not mix inline Tailwind classes in TSX/JSX (except for dynamic conditional utilities via `clsx`/`tailwind-merge` where strictly necessary).
+- **Design System:** Prioritize using the shared Shadcn-like components located in `packages/ui` rather than building custom components from scratch.
+
+---
+
 # END OF AI GOVERNANCE DOCUMENT

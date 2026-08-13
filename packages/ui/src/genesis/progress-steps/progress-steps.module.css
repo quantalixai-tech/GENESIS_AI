@@ -1,5 +1,4 @@
-@reference "tailwindcss";
-@reference "@repo/tailwind-config/theme.css";
+@reference "../../../../../apps/web/app/globals.css";
 
 .list {
   @apply flex flex-col gap-0 list-none m-0 p-0;

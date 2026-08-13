@@ -1,35 +1,18 @@
+@reference "../../../globals.css";
+
 .main {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  padding: 2rem;
+  @apply relative flex min-h-screen items-center justify-center overflow-hidden p-8;
 }
 
 .orb {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 600px;
-  height: 600px;
+  @apply pointer-events-none absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full;
   background: radial-gradient(circle, var(--color-primary-glow) 0%, transparent 60%);
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  z-index: 0;
   animation: pulse 8s ease-in-out infinite alternate;
 }
 
 .orbSecondary {
-  position: absolute;
-  top: 20%;
-  right: 10%;
-  width: 400px;
-  height: 400px;
+  @apply pointer-events-none absolute right-[10%] top-[20%] h-[400px] w-[400px] rounded-full;
   background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 0;
   animation: pulse 6s ease-in-out infinite alternate-reverse;
 }
 
@@ -39,115 +22,62 @@
 }
 
 .container {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 420px;
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: 2.5rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(12px);
+  @apply relative z-10 w-full max-w-[420px] rounded-xl border border-border bg-card/80 p-10 shadow-2xl backdrop-blur-xl;
 }
 
 .header {
-  text-align: center;
-  margin-bottom: 2.5rem;
+  @apply mb-10 text-center;
 }
 
 .logo {
-  font-size: 2.5rem;
-  color: var(--color-primary);
-  margin-bottom: 1rem;
-  line-height: 1;
+  @apply mb-4 text-4xl leading-none text-primary;
   text-shadow: 0 0 20px var(--color-primary-glow);
 }
 
 .title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: 0.5rem;
+  @apply mb-2 text-2xl font-semibold tracking-tight text-foreground;
 }
 
 .subtitle {
-  font-size: 0.95rem;
-  color: var(--color-text-secondary);
+  @apply text-sm text-muted-foreground;
 }
 
 .form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+  @apply flex flex-col gap-5;
 }
 
 .formGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  @apply flex flex-col gap-2;
 }
 
 .label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-primary);
+  @apply text-sm font-medium text-foreground;
 }
 
 .input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  color: var(--color-text-primary);
-  font-family: var(--font-sans);
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
-  outline: none;
-}
-
-.input::placeholder {
-  color: var(--color-text-muted);
-}
-
-.input:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px var(--color-primary-glow);
+  @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
 }
 
 .submitBtn {
-  margin-top: 0.5rem;
+  @apply mt-2;
 }
 
 .footer {
-  margin-top: 2rem;
-  text-align: center;
+  @apply mt-8 text-center;
 }
 
 .footerText {
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
+  @apply text-sm text-muted-foreground;
 }
 
 .link {
-  color: var(--color-primary-light);
-  font-weight: 500;
-  transition: color 0.2s ease;
+  @apply font-medium text-primary transition-colors hover:text-primary-light;
 }
 
 .link:hover {
-  color: #fff;
   text-shadow: 0 0 8px var(--color-primary-glow);
 }
 
 .errorAlert {
-  background-color: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: var(--color-error);
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-md);
-  font-size: 0.9rem;
-  margin-bottom: 1.25rem;
-  text-align: center;
+  @apply mb-5;
 }

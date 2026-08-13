@@ -1,46 +1,29 @@
-@reference "tailwindcss";
-@reference "@repo/tailwind-config/theme.css";
+@reference "../../../../../apps/web/app/globals.css";
 
 /* ── Base ────────────────────────────────────────────────────────────────── */
 
 .base {
-  @apply inline-flex items-center justify-center gap-1.5 font-semibold tracking-wide
-         whitespace-nowrap border rounded-xl cursor-pointer select-none no-underline
-         transition-all duration-150;
+  @apply inline-flex items-center justify-center gap-2 font-medium tracking-normal
+         whitespace-nowrap border rounded-md cursor-pointer select-none no-underline
+         transition-colors duration-200 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
 }
 
 /* ── Variants ────────────────────────────────────────────────────────────── */
 
 .primary {
-  @apply bg-gradient-to-br from-[#6366f1] to-[#7c3aed] text-white border-transparent
-         shadow-[0_4px_14px_rgba(99,102,241,0.3)];
-}
-.primary:hover:not(:disabled) {
-  @apply -translate-y-px shadow-[0_6px_20px_rgba(99,102,241,0.45)];
-}
-.primary:active:not(:disabled) {
-  @apply translate-y-0 shadow-[0_2px_8px_rgba(99,102,241,0.25)];
+  @apply bg-primary text-primary-foreground border-transparent hover:bg-primary/90;
 }
 
 .secondary {
-  @apply bg-white/[0.04] text-[var(--color-text-secondary)] border-[var(--color-border)];
-}
-.secondary:hover:not(:disabled) {
-  @apply bg-white/[0.07] text-[var(--color-text-primary)] border-white/[0.14];
+  @apply bg-secondary text-secondary-foreground border-transparent hover:bg-secondary/80;
 }
 
 .ghost {
-  @apply bg-transparent text-[var(--color-text-secondary)] border-transparent;
-}
-.ghost:hover:not(:disabled) {
-  @apply bg-white/[0.05] text-[var(--color-text-primary)];
+  @apply bg-transparent text-foreground border-transparent hover:bg-accent hover:text-accent-foreground;
 }
 
 .danger {
-  @apply bg-red-500/10 text-red-400 border-red-500/30;
-}
-.danger:hover:not(:disabled) {
-  @apply bg-red-500/16 border-red-400;
+  @apply bg-destructive text-destructive-foreground border-transparent hover:bg-destructive/90;
 }
 
 /* ── Sizes ───────────────────────────────────────────────────────────────── */

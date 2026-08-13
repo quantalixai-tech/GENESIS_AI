@@ -22,16 +22,13 @@ from datetime import UTC, datetime, timedelta
 import jwt
 from fastapi import Depends, Request
 from fastapi.security import OAuth2PasswordBearer
-from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlmodel import Session
+import bcrypt
 
 import genesis_db
 from core.config import settings
 from core.errors import ErrorCode, UnauthorizedError
-import bcrypt
-from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login", auto_error=False)
 

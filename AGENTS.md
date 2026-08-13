@@ -256,6 +256,19 @@ function processData(data: unknown): ProcessedData {
 }
 ```
 
+### CSS / Styling
+
+```css
+/* Use CSS Modules with Tailwind @apply directive */
+@reference "tailwindcss";
+@reference "@repo/tailwind-config/theme.css";
+
+/* GOOD: Uses strict Shadcn design system tokens */
+.button {
+  @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background;
+}
+```
+
 ---
 
 ## Repository Layout Reference

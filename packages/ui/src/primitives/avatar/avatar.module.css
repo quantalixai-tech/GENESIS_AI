@@ -1,5 +1,4 @@
-@reference "tailwindcss";
-@reference "@repo/tailwind-config/theme.css";
+@reference "../../../../../apps/web/app/globals.css";
 
 .root {
   @apply relative inline-flex items-center justify-center
