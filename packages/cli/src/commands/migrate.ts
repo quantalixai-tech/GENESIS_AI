@@ -118,7 +118,15 @@ export function registerMigrateCommand(program: Command): void {
           env: baseEnv,
           stdio: 'pipe',
         });
-        spinner.succeed('Migrations applied');
+        
+        spinner.text = 'Seeding database...';
+        await execa('uv', ['run', 'python', 'packages/db/seed.py'], {
+          cwd: REPO_ROOT,
+          env: baseEnv,
+          stdio: 'pipe',
+        });
+        
+        spinner.succeed('Migrations and seeding applied');
         if (result.stdout) {
           console.log('');
           console.log(result.stdout
@@ -127,7 +135,7 @@ export function registerMigrateCommand(program: Command): void {
             .join('\n'));
         }
       } catch (err) {
-        spinner.fail(`Migration failed: ${err instanceof Error ? err.message : String(err)}`);
+        spinner.fail(`Migration or seeding failed: ${err instanceof Error ? err.message : String(err)}`);
         process.exit(1);
       }
 

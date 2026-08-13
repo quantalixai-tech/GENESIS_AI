@@ -218,7 +218,7 @@ const STATUS_ITEMS = [
   { name: "MinIO", detail: "Object storage — genesis:9000", active: true },
   { name: "FastAPI", detail: "Core API — localhost:8080", active: true },
   { name: "Worker", detail: "NATS consumer", active: true },
-  { name: "AI Engine", detail: "Model routing — Phase 1.0", active: false },
-  { name: "Ollama", detail: "Local LLM runtime — Phase 1.0", active: false },
+  { name: "AI Engine", detail: "Model routing — Phase 1.0", active: true },
+  { name: "Ollama", detail: "Local LLM runtime — Phase 1.0", active: true },
   { name: "Observability", detail: "Prometheus / Grafana — Phase 1.0", active: false },
 ];

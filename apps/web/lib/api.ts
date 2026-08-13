@@ -37,7 +37,7 @@ export async function fetchServerApi(endpoint: string, options: RequestInit = {}
   const headers = new Headers(options.headers);
   headers.set('Content-Type', 'application/json');
   if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
+    headers.set('Cookie', `genesis_token=${token}`);
   }
 
   const res = await fetch(`${SERVER_API_URL}${endpoint}`, {
@@ -63,14 +63,11 @@ export async function fetchServerApi(endpoint: string, options: RequestInit = {}
 
 /**
  * Client-side API fetch wrapper.
- * For auth routes it talks to our Next.js API proxy to set/clear httpOnly cookies.
- * For other routes it calls the Next.js API proxy to attach the token.
+ * Calls the backend directly, including HttpOnly cookies automatically
+ * using credentials: 'include'.
  */
 export async function fetchClientApi(endpoint: string, options: RequestInit = {}): Promise<unknown> {
-  // Route auth endpoints directly to Next.js API routes (they set/clear httpOnly cookies).
-  // All other requests go through the proxy route which attaches the Bearer token.
-  const isAuthNextjsRoute = endpoint.startsWith('/api/auth');
-  const url = isAuthNextjsRoute ? endpoint : `/api/proxy${endpoint}`;
+  const url = `${CLIENT_API_URL}${endpoint}`;
 
   const headers = new Headers(options.headers);
   if (!(options.body instanceof FormData)) {
@@ -80,6 +77,7 @@ export async function fetchClientApi(endpoint: string, options: RequestInit = {}
   const res = await fetch(url, {
     ...options,
     headers,
+    credentials: 'include', // Ensures the browser sends the genesis_token cookie
   });
 
   if (!res.ok) {

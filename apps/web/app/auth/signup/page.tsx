@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@genesis/ui';
+import { Button, Input, Alert } from '@genesis/ui';
 import { fetchClientApi, ApiError } from '../../../lib/api';
 import styles from '../login/page.module.css'; // Reusing login styles for consistency
 import Link from 'next/link';
@@ -32,7 +32,7 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      await fetchClientApi('/api/auth/signup', {
+      await fetchClientApi('/auth/signup', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       });
@@ -64,58 +64,46 @@ export default function SignupPage() {
         </div>
 
         {error && (
-          <div className={styles.errorAlert} role="alert">
+          <Alert variant="error" className={styles.errorAlert}>
             {error}
-          </div>
+          </Alert>
         )}
 
         <form className={styles.form} onSubmit={handleSubmit}>
-          <div className={styles.formGroup}>
-            <label htmlFor="email" className={styles.label}>Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              className={styles.input}
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={loading}
-            />
-          </div>
+          <Input
+            label="Email"
+            type="email"
+            name="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+            required
+            disabled={loading}
+          />
           
-          <div className={styles.formGroup}>
-            <label htmlFor="password" className={styles.label}>Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              className={styles.input}
-              placeholder="Min. 8 characters"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={loading}
-              minLength={8}
-            />
-          </div>
+          <Input
+            label="Password"
+            type="password"
+            name="password"
+            placeholder="Min. 8 characters"
+            value={password}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+            required
+            disabled={loading}
+            minLength={8}
+          />
 
-          <div className={styles.formGroup}>
-            <label htmlFor="confirmPassword" className={styles.label}>Confirm Password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              className={styles.input}
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              disabled={loading}
-              minLength={8}
-            />
-          </div>
+          <Input
+            label="Confirm Password"
+            type="password"
+            name="confirmPassword"
+            placeholder="••••••••"
+            value={confirmPassword}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+            required
+            disabled={loading}
+            minLength={8}
+          />
 
           <Button type="submit" fullWidth loading={loading} className={styles.submitBtn}>
             Sign Up

@@ -20,7 +20,7 @@ Security properties:
 from datetime import UTC, datetime, timedelta
 
 import jwt
-from fastapi import Depends
+from fastapi import Depends, Request
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from pydantic import BaseModel
@@ -29,23 +29,23 @@ from sqlmodel import Session
 import genesis_db
 from core.config import settings
 from core.errors import ErrorCode, UnauthorizedError
+import bcrypt
+from fastapi.security import OAuth2PasswordBearer
+from pydantic import BaseModel
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
-
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login", auto_error=False)
 
 class TokenData(BaseModel):
     user_id: str | None = None
 
-
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Return True if plain_password matches the stored bcrypt hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 
 def get_password_hash(password: str) -> str:
     """Return a bcrypt hash of the given password."""
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
@@ -67,25 +67,26 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
 
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme),
+    request: Request,
+    token: str | None = Depends(oauth2_scheme),
     session: Session = Depends(genesis_db.get_session),
 ) -> genesis_db.User:
     """
     FastAPI dependency: decode the JWT and return the authenticated User.
-
-    Raises:
-        UnauthorizedError — if the token is missing, malformed, expired, or the
-                            user no longer exists. The error detail is intentionally
-                            generic to avoid leaking token validity information.
+    First checks 'genesis_token' cookie, then Authorization Bearer header.
     """
     _credentials_error = UnauthorizedError(
         "Could not validate credentials.",
         code=ErrorCode.TOKEN_INVALID,
     )
 
+    actual_token = request.cookies.get("genesis_token") or token
+    if not actual_token:
+        raise _credentials_error
+
     try:
         payload = jwt.decode(
-            token,
+            actual_token,
             settings.jwt_secret,
             algorithms=[settings.jwt_algorithm],
         )

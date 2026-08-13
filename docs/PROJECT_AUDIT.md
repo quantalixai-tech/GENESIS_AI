@@ -86,7 +86,7 @@ NATS → Worker (asyncio) → DB [basic subscriber, no real processing]
 |---|---|---|---|---|
 | Repository + monorepo structure | Complete | pnpm + uv + Turborepo | — | — |
 | Local dev infrastructure (Docker) | Complete | Postgres/NATS/MinIO compose | — | — |
-| User entity + authentication | Partial | JWT signup/login/me | No email validation, insecure fallback secret, 7-day hardcoded expiry | P0 |
+| User entity + authentication | Partial | JWT signup/login/me with HttpOnly cookies | No email validation, insecure fallback secret, 7-day hardcoded expiry | P0 |
 | Workspace entity | Complete | CRUD routes + DB model | Not in BACKEND_SCHEMA.md (intentional extension) | Low |
 | Project entity | Partial | Create/list/delete | Missing status, project_type fields from schema | P2 |
 | Structured error handling | Missing | FastAPI defaults only | No error model, no error codes | P1 |

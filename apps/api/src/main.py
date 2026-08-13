@@ -115,23 +115,26 @@ from api.v1 import health as health_module  # noqa: E402
 app.include_router(health_module.router, prefix="/api")
 
 # Versioned API routes
+from fastapi import Depends
 from api.v1 import agents, auth, conversations, git, projects, workspaces  # noqa: E402
+from core.security import get_current_user
 
 api_v1_prefix = f"/api/{settings.api_version}"
+protected = [Depends(get_current_user)]
 
 app.include_router(auth.router, prefix=api_v1_prefix)
-app.include_router(workspaces.router, prefix=api_v1_prefix)
-app.include_router(projects.router, prefix=api_v1_prefix)
+app.include_router(workspaces.router, prefix=api_v1_prefix, dependencies=protected)
+app.include_router(projects.router, prefix=api_v1_prefix, dependencies=protected)
 
 # Conversation domain
-app.include_router(conversations.router, prefix=api_v1_prefix)
-app.include_router(conversations.requirements_router, prefix=api_v1_prefix)
+app.include_router(conversations.router, prefix=api_v1_prefix, dependencies=protected)
+app.include_router(conversations.requirements_router, prefix=api_v1_prefix, dependencies=protected)
 
 # Agent governance
-app.include_router(agents.router, prefix=api_v1_prefix)
+app.include_router(agents.router, prefix=api_v1_prefix, dependencies=protected)
 
 # Git history
-app.include_router(git.router, prefix=api_v1_prefix)
+app.include_router(git.router, prefix=api_v1_prefix, dependencies=protected)
 
 
 # ---------------------------------------------------------------------------
