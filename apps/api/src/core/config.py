@@ -17,6 +17,9 @@ Optional environment variables (safe defaults for development):
     GENESIS_LOG_LEVEL   — Log verbosity (debug | info | warning | error)
     CORS_ORIGINS        — Comma-separated list of allowed CORS origins
     ACCESS_TOKEN_EXPIRE_MINUTES — JWT token lifetime in minutes
+    NATS_URL            — NATS connection URL
+    OLLAMA_BASE_URL     — Ollama local LLM endpoint
+    PROJECTS_ROOT       — Filesystem root for per-project git repositories
 """
 
 from functools import lru_cache
@@ -98,6 +101,30 @@ class Settings(BaseSettings):
     def cors_origins(self) -> list[str]:
         """Return CORS origins as a list, split from the comma-separated env var."""
         return [origin.strip() for origin in self.cors_origins_raw.split(",") if origin.strip()]
+
+    # -------------------------------------------------------------------------
+    # Message bus — NATS (per ADR-005)
+    # -------------------------------------------------------------------------
+    nats_url: str = Field(
+        default="nats://nats:4222",
+        description="NATS connection URL for agent task dispatch",
+    )
+
+    # -------------------------------------------------------------------------
+    # Local LLM — Ollama (per ADR-006)
+    # -------------------------------------------------------------------------
+    ollama_base_url: str = Field(
+        default="http://ollama:11434",
+        description="Base URL for Ollama local LLM runtime",
+    )
+
+    # -------------------------------------------------------------------------
+    # Project filesystem — git repos (per ADR-009)
+    # -------------------------------------------------------------------------
+    projects_root: str = Field(
+        default="/projects",
+        description="Root directory for per-project git repositories on the shared volume",
+    )
 
     # -------------------------------------------------------------------------
     # API

@@ -73,7 +73,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(
     title=settings.api_title,
     description=settings.api_description,
-    version="0.3.0",
+    version="1.0.0",
     lifespan=lifespan,
     # Disable auto-generated docs in production for reduced attack surface
     docs_url="/docs" if not settings.is_production else None,
@@ -115,13 +115,23 @@ from api.v1 import health as health_module  # noqa: E402
 app.include_router(health_module.router, prefix="/api")
 
 # Versioned API routes
-from api.v1 import auth, projects, workspaces  # noqa: E402
+from api.v1 import agents, auth, conversations, git, projects, workspaces  # noqa: E402
 
 api_v1_prefix = f"/api/{settings.api_version}"
 
 app.include_router(auth.router, prefix=api_v1_prefix)
 app.include_router(workspaces.router, prefix=api_v1_prefix)
 app.include_router(projects.router, prefix=api_v1_prefix)
+
+# Conversation domain
+app.include_router(conversations.router, prefix=api_v1_prefix)
+app.include_router(conversations.requirements_router, prefix=api_v1_prefix)
+
+# Agent governance
+app.include_router(agents.router, prefix=api_v1_prefix)
+
+# Git history
+app.include_router(git.router, prefix=api_v1_prefix)
 
 
 # ---------------------------------------------------------------------------

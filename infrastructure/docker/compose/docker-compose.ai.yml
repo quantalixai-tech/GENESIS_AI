@@ -1,0 +1,76 @@
+---
+# AI Layer — Ollama + Model Router
+#
+# Per ADR-006: Ollama is the primary local LLM runtime.
+# Start with: docker compose -f docker-compose.yml -f docker-compose.ai.yml up
+#
+# Required env vars (see infrastructure.md for full list):
+#   OLLAMA_PORT         — host port mapping (default: 11434)
+#   OLLAMA_HOST         — container hostname (default: ollama)
+
+services:
+  # ---------------------------------------------------------------------------
+  # Ollama — Local LLM Runtime
+  # ---------------------------------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    container_name: genesis-ollama
+    restart: unless-stopped
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - genesis-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            # GPU passthrough — remove if no NVIDIA GPU available
+            # The service will still work with CPU-only inference (slower)
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    labels:
+      genesis.service: "ollama"
+      genesis.layer: "ai"
+      genesis.version: "1.0.0"
+    environment:
+      OLLAMA_HOST: "0.0.0.0"
+
+  # ---------------------------------------------------------------------------
+  # Model Puller — downloads default model on first start
+  # ---------------------------------------------------------------------------
+  ollama-pull:
+    image: ollama/ollama:latest
+    container_name: genesis-ollama-pull
+    depends_on:
+      ollama:
+        condition: service_healthy
+    networks:
+      - genesis-network
+    volumes:
+      - ollama-data:/root/.ollama
+    entrypoint: >
+      sh -c "
+        OLLAMA_HOST=ollama:11434 ollama pull ${OLLAMA_DEFAULT_MODEL:-llama3.2:3b} &&
+        echo 'Model pulled successfully'
+      "
+    labels:
+      genesis.service: "ollama-pull"
+      genesis.layer: "ai"
+      genesis.version: "1.0.0"
+    restart: on-failure
+
+volumes:
+  ollama-data:
+    name: genesis-ollama-data
+    labels:
+      genesis.service: "ollama"
+      genesis.layer: "ai"

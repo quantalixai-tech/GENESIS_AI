@@ -32,6 +32,7 @@ Future tables (defined in docs/BACKEND_SCHEMA.md):
 
 import uuid
 from datetime import UTC, datetime
+from enum import StrEnum
 
 from sqlalchemy import func
 from sqlmodel import Column, DateTime, Field, Relationship, SQLModel
@@ -40,6 +41,34 @@ from sqlmodel import Column, DateTime, Field, Relationship, SQLModel
 def _utcnow() -> datetime:
     """Return the current UTC time as a timezone-aware datetime."""
     return datetime.now(UTC)
+
+
+# =============================================================================
+# Enumerations
+# =============================================================================
+
+
+class ProjectType(StrEnum):
+    WEBSITE = "website"
+    WEB_APP = "web_app"
+    MOBILE = "mobile"
+    DESKTOP = "desktop"
+    RESUME = "resume"
+    DASHBOARD = "dashboard"
+    ECOMMERCE = "ecommerce"
+    SAAS = "saas"
+    INTERNAL = "internal"
+    CUSTOM = "custom"
+
+
+class ProjectStatus(StrEnum):
+    DISCOVERY = "discovery"
+    PLANNING = "planning"
+    IMPLEMENTING = "implementing"
+    VALIDATING = "validating"
+    READY = "ready"
+    BLOCKED = "blocked"
+    ARCHIVED = "archived"
 
 
 # =============================================================================
@@ -133,6 +162,16 @@ class WorkspacePublic(WorkspaceBase):
 class ProjectBase(SQLModel):
     name: str = Field(max_length=255)
     description: str | None = Field(default=None, max_length=2000)
+    project_type: str = Field(
+        default=ProjectType.CUSTOM,
+        max_length=50,
+        description="website | web_app | mobile | desktop | resume | dashboard | ecommerce | saas | internal | custom",
+    )
+    status: str = Field(
+        default=ProjectStatus.DISCOVERY,
+        max_length=30,
+        description="discovery | planning | implementing | validating | ready | blocked | archived",
+    )
 
 
 class Project(ProjectBase, table=True):
@@ -140,6 +179,14 @@ class Project(ProjectBase, table=True):
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     workspace_id: uuid.UUID = Field(foreign_key="workspace.id", index=True)
+    repository_path: str | None = Field(
+        default=None,
+        description="Absolute path to the project git repository on the shared volume",
+    )
+    current_commit_id: uuid.UUID | None = Field(
+        default=None,
+        description="GitCommit.id of the current HEAD commit",
+    )
 
     created_at: datetime = Field(
         default_factory=_utcnow,
@@ -164,6 +211,7 @@ class ProjectPublic(ProjectBase):
 
     id: uuid.UUID
     workspace_id: uuid.UUID
+    repository_path: str | None = None
     created_at: datetime
 
 

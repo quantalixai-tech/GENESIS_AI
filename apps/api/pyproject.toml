@@ -12,6 +12,14 @@ dependencies = [
     "pydantic-settings>=2.3.0",
     "pydantic[email]>=2.7.0",
     "genesis_db",
+    # LLM abstraction layer — per ADR-006 (LiteLLM + Ollama)
+    "litellm>=1.44.0",
+    # NATS client for agent task dispatch — per ADR-005
+    "nats-py>=2.7.0",
+    # Git operations for per-project repos — per ADR-009
+    "gitpython>=3.1.43",
+    # Rate limiting (Phase 10 — security hardening)
+    "slowapi>=0.1.9",
 ]
 
 [tool.uv.sources]
