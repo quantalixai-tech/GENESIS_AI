@@ -56,7 +56,7 @@ export function registerMigrateCommand(program: Command): void {
       logInfo(`Database: ${c.muted(databaseUrl.replace(/:[^:@]+@/, ':***@'))}`);
 
       const baseEnv = { ...process.env, DATABASE_URL: databaseUrl };
-      const alembicBase = ['run', '-p', DB_PACKAGE, 'alembic', '-c', ALEMBIC_INI];
+      const alembicBase = ['run', 'alembic', '-c', ALEMBIC_INI];
 
       if (opts.history) {
         // Show history

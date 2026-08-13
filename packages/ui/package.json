@@ -4,7 +4,9 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
-    "./*": "./src/*.tsx"
+    "./primitives/*": "./src/primitives/*/index.ts",
+    "./feedback/*": "./src/feedback/*/index.ts",
+    "./genesis/*": "./src/genesis/*/index.ts"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",

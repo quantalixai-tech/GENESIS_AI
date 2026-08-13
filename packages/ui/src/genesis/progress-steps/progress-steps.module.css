@@ -1,0 +1,68 @@
+@reference "tailwindcss";
+@reference "@repo/tailwind-config/theme.css";
+
+.list {
+  @apply flex flex-col gap-0 list-none m-0 p-0;
+}
+
+.item {
+  @apply flex items-start gap-3 py-2 text-sm relative;
+}
+
+/* Connector line between steps */
+.item:not(:last-child)::after {
+  content: '';
+  @apply absolute left-[0.6rem] top-7 bottom-0 w-px bg-[var(--color-border)];
+}
+
+/* ── Icon ────────────────────────────────────────────────────────────────── */
+
+.icon {
+  @apply w-5 h-5 rounded-full flex items-center justify-center
+         text-[0.65rem] font-bold shrink-0 mt-px z-[1];
+}
+
+/* ── States ──────────────────────────────────────────────────────────────── */
+
+.done .icon {
+  @apply bg-emerald-500/15 text-emerald-400;
+}
+.done .label {
+  @apply text-[var(--color-text-secondary)] line-through;
+}
+
+.active .icon {
+  @apply bg-[#6366f1]/20 text-[#818cf8];
+  animation: pulse-ring 1.8s ease-in-out infinite;
+}
+.active .label {
+  @apply text-[var(--color-text-primary)] font-medium;
+}
+
+.pending .icon {
+  @apply bg-white/[0.04] text-[var(--color-text-muted)];
+}
+.pending .label {
+  @apply text-[var(--color-text-muted)];
+}
+
+/* ── Text ────────────────────────────────────────────────────────────────── */
+
+.textGroup {
+  @apply flex flex-col gap-0.5 min-w-0;
+}
+
+.label {
+  @apply leading-5 transition-colors duration-150;
+}
+
+.detail {
+  @apply text-xs text-[var(--color-text-muted)] font-mono truncate;
+}
+
+/* ── Active pulse ────────────────────────────────────────────────────────── */
+
+@keyframes pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+  50%       { box-shadow: 0 0 0 4px rgba(99, 102, 241, 0); }
+}

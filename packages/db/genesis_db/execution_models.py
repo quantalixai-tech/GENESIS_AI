@@ -224,7 +224,7 @@ class ProjectIndex(SQLModel, table=True):
         sa_column=Column(JSON),
         description="List of project_index UUIDs for tests covering this symbol",
     )
-    metadata: dict | None = Field(
+    index_metadata: dict | None = Field(
         default=None,
         sa_column=Column(JSON),
     )
@@ -281,7 +281,7 @@ class IndexRelationship(SQLModel, table=True):
         max_length=100,
         description="e.g., IMPLEMENTS, DEPENDS_ON, TESTS, GENERATES",
     )
-    metadata: dict | None = Field(default=None, sa_column=Column(JSON))
+    index_metadata: dict | None = Field(default=None, sa_column=Column(JSON))
 
 
 # =============================================================================

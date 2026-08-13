@@ -1,0 +1,25 @@
+@reference "tailwindcss";
+@reference "@repo/tailwind-config/theme.css";
+
+.base {
+  @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full
+         text-[0.7rem] font-semibold tracking-[0.05em] uppercase whitespace-nowrap
+         border transition-colors duration-150;
+}
+
+/* Animated pulse dot inside badge */
+@keyframes badge-pulse { 50% { opacity: 0.4; } }
+
+.dot {
+  @apply w-1.5 h-1.5 rounded-full bg-current shrink-0;
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+/* ── Variants ────────────────────────────────────────────────────────────── */
+
+.default  { @apply bg-[#6366f1]/10 text-[#818cf8] border-[#6366f1]/25; }
+.success  { @apply bg-emerald-500/10 text-emerald-400 border-emerald-500/25; }
+.warning  { @apply bg-amber-500/10 text-amber-400 border-amber-500/25; }
+.error    { @apply bg-red-500/10 text-red-400 border-red-500/25; }
+.info     { @apply bg-sky-500/10 text-sky-400 border-sky-500/25; }
+.neutral  { @apply bg-white/[0.04] text-[var(--color-text-secondary)] border-white/[0.08]; }

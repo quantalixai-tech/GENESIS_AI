@@ -1,0 +1,71 @@
+@reference "tailwindcss";
+@reference "@repo/tailwind-config/theme.css";
+
+/* ── Base ────────────────────────────────────────────────────────────────── */
+
+.base {
+  @apply inline-flex items-center justify-center gap-1.5 font-semibold tracking-wide
+         whitespace-nowrap border rounded-xl cursor-pointer select-none no-underline
+         transition-all duration-150;
+}
+
+/* ── Variants ────────────────────────────────────────────────────────────── */
+
+.primary {
+  @apply bg-gradient-to-br from-[#6366f1] to-[#7c3aed] text-white border-transparent
+         shadow-[0_4px_14px_rgba(99,102,241,0.3)];
+}
+.primary:hover:not(:disabled) {
+  @apply -translate-y-px shadow-[0_6px_20px_rgba(99,102,241,0.45)];
+}
+.primary:active:not(:disabled) {
+  @apply translate-y-0 shadow-[0_2px_8px_rgba(99,102,241,0.25)];
+}
+
+.secondary {
+  @apply bg-white/[0.04] text-[var(--color-text-secondary)] border-[var(--color-border)];
+}
+.secondary:hover:not(:disabled) {
+  @apply bg-white/[0.07] text-[var(--color-text-primary)] border-white/[0.14];
+}
+
+.ghost {
+  @apply bg-transparent text-[var(--color-text-secondary)] border-transparent;
+}
+.ghost:hover:not(:disabled) {
+  @apply bg-white/[0.05] text-[var(--color-text-primary)];
+}
+
+.danger {
+  @apply bg-red-500/10 text-red-400 border-red-500/30;
+}
+.danger:hover:not(:disabled) {
+  @apply bg-red-500/16 border-red-400;
+}
+
+/* ── Sizes ───────────────────────────────────────────────────────────────── */
+
+.sm { @apply px-3.5 py-1.5 text-xs; }
+.md { @apply px-5 py-2.5 text-sm; }
+.lg { @apply px-7 py-3 text-[0.9375rem]; }
+
+/* ── Modifiers ───────────────────────────────────────────────────────────── */
+
+.fullWidth { @apply w-full; }
+
+.iconOnly.sm { @apply px-1.5; }
+.iconOnly.md { @apply px-2.5; }
+.iconOnly.lg { @apply px-3; }
+
+.disabled { @apply opacity-45 cursor-not-allowed pointer-events-none; }
+
+/* ── Loading spinner ─────────────────────────────────────────────────────── */
+
+@keyframes btn-spin { to { transform: rotate(360deg); } }
+
+.spinner {
+  @apply inline-block rounded-full border-2 border-current border-t-transparent shrink-0;
+  width: 0.9em;
+  height: 0.9em;
+  animation: btn-spin 0.65s linear infinite;
+}

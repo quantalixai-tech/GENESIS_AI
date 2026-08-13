@@ -1,0 +1,42 @@
+@reference "tailwindcss";
+@reference "@repo/tailwind-config/theme.css";
+
+.root {
+  @apply flex gap-3 rounded-xl border p-4 text-sm leading-relaxed;
+}
+
+/* ── Variants ────────────────────────────────────────────────────────────── */
+
+.info {
+  @apply bg-sky-500/[0.08] border-sky-500/25 text-sky-300;
+}
+
+.success {
+  @apply bg-emerald-500/[0.08] border-emerald-500/25 text-emerald-300;
+}
+
+.warning {
+  @apply bg-amber-500/[0.08] border-amber-500/25 text-amber-300;
+}
+
+.error {
+  @apply bg-red-500/[0.08] border-red-500/25 text-red-300;
+}
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+
+.icon {
+  @apply shrink-0 text-base mt-px font-bold;
+}
+
+.body {
+  @apply flex-1 min-w-0;
+}
+
+.title {
+  @apply font-semibold text-[var(--color-text-primary)] mb-1 m-0;
+}
+
+.content {
+  @apply text-current opacity-90;
+}

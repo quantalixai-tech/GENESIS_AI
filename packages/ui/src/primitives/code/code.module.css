@@ -1,0 +1,14 @@
+@reference "tailwindcss";
+@reference "@repo/tailwind-config/theme.css";
+
+.inline {
+  @apply font-mono text-[0.875em] rounded border
+         bg-[#6366f1]/[0.08] text-[var(--color-primary-light)]
+         border-[#6366f1]/[0.15] px-[0.4em] py-[0.1em];
+}
+
+.block {
+  @apply font-mono text-sm leading-relaxed rounded-lg border block overflow-x-auto
+         whitespace-pre bg-[#6366f1]/[0.06] text-[var(--color-primary-light)]
+         border-[#6366f1]/[0.15] p-4;
+}

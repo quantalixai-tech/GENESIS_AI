@@ -2,6 +2,7 @@
   "name": "genesis_devcontainer",
   "dockerComposeFile": [
     "../infrastructure/docker/compose/docker-compose.yml",
+    "../infrastructure/docker/compose/docker-compose.ai.yml",
     "docker-compose.yml"
   ],
   "service": "app",
@@ -17,13 +18,14 @@
     }
   },
   "postCreateCommand": "bash /workspace/.devcontainer/post-create.sh",
-  "forwardPorts": [3000, 8080, 5432, 4222, 8222, 9000, 9001],
+  "forwardPorts": [3000, 8080, 5432, 4222, 8222, 9000, 9001, 11434],
   "portsAttributes": {
     "3000": { "label": "Web (genesis dev)", "onAutoForward": "openBrowser" },
     "8080": { "label": "API (genesis dev)", "onAutoForward": "notify" },
     "5432": { "label": "PostgreSQL" },
     "4222": { "label": "NATS" },
-    "9000": { "label": "MinIO" }
+    "9000": { "label": "MinIO" },
+    "11434": { "label": "Ollama" }
   },
   "customizations": {
     "vscode": {
@@ -31,8 +33,8 @@
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "ms-python.python",
-        "ms-python.black-formatter",
         "charliermarsh.ruff",
+        "bradlc.vscode-tailwindcss",
         "ms-azuretools.vscode-docker",
         "eamodio.gitlens",
         "usernamehw.errorlens",
@@ -48,9 +50,6 @@
         "python.analysis.typeCheckingMode": "basic",
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "[python]": {
-          "editor.defaultFormatter": "ms-python.black-formatter"
-        },
         "terminal.integrated.cwd": "/workspace"
       }
     }
@@ -60,6 +59,7 @@
     "GENESIS_DEV_SERVICE_HOST": "postgres",
     "GENESIS_DEV_NATS_HOST": "nats",
     "GENESIS_DEV_MINIO_HOST": "minio",
+    "GENESIS_DEV_OLLAMA_HOST": "ollama",
     "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
     "PATH": "${containerEnv:PATH}:/root/.local/bin:/home/vscode/.local/bin:/workspace/node_modules/.bin:/workspace/.venv/bin"
   }

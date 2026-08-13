@@ -1,6 +1,6 @@
 import { fetchServerApi, ApiError } from '../../lib/api';
 import { redirect } from 'next/navigation';
-import { Button } from '@genesis/ui';
+import { Button, StatusBadge, CardHeader, CardTitle, CardFooter } from '@genesis/ui';
 import styles from './page.module.css';
 import Link from 'next/link';
 
@@ -109,16 +109,16 @@ export default async function DashboardPage() {
             <div className={styles.grid}>
               {projects.map((project) => (
                 <Link href={`/projects/${project.id}`} key={project.id} className={styles.card}>
-                  <div className={styles.cardHeader}>
-                    <h3 className={styles.cardTitle}>{project.name}</h3>
-                    <div className={styles.statusBadge}>Active</div>
-                  </div>
+                  <CardHeader>
+                    <CardTitle className={styles.cardTitle}>{project.name}</CardTitle>
+                    <StatusBadge status="active" />
+                  </CardHeader>
                   <p className={styles.cardDesc}>
-                    {project.description || 'No description provided.'}
+                    {project.description ?? 'No description provided.'}
                   </p>
-                  <div className={styles.cardFooter}>
+                  <CardFooter className={styles.cardFooter}>
                     Updated {new Date(project.updated_at).toLocaleDateString()}
-                  </div>
+                  </CardFooter>
                 </Link>
               ))}
             </div>

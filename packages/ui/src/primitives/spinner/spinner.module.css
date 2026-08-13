@@ -1,0 +1,14 @@
+@reference "tailwindcss";
+@reference "@repo/tailwind-config/theme.css";
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.base {
+  @apply inline-block rounded-full border-2 shrink-0
+         border-[var(--color-primary-glow)] border-t-[var(--color-primary)];
+  animation: spin 0.7s linear infinite;
+}
+
+.sm { @apply w-4 h-4; }
+.md { @apply w-6 h-6; }
+.lg { @apply w-10 h-10; }

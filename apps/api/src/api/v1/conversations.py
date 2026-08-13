@@ -24,7 +24,7 @@ from pydantic import BaseModel
 from sqlmodel import Session
 
 import genesis_db
-from core.database import get_session
+from genesis_db import get_session
 from core.security import get_current_user
 from services import conversation_service, llm_service
 

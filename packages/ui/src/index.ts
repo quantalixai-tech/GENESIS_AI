@@ -1,24 +1,62 @@
 /**
- * @genesis/ui — Genesis AI Shared UI Package
+ * @genesis/ui — Public API
  *
- * Public API for shared UI components.
- * Import from '@repo/ui' in application code.
+ * Modular design system for the GENESIS AI platform.
  *
- * Example:
- *   import { Button, Card, Badge } from '@repo/ui';
+ * Structure:
+ *   primitives/ — base UI atoms (button, badge, card, input, spinner, code, avatar)
+ *   feedback/   — feedback patterns (alert, progress)
+ *   genesis/    — platform-specific composed components
+ *
+ * Usage:
+ *   import { Button, Card, StatusBadge } from '@genesis/ui';
  */
 
-export { Button } from './button';
-export type { } from './button';
+// ── Lib ───────────────────────────────────────────────────────────────────────
+export { cx } from './lib/utils';
 
-export { Card } from './card';
-export type { } from './card';
+// ── Primitives ────────────────────────────────────────────────────────────────
+export { Button } from './primitives/button/Button';
+export type { ButtonProps, ButtonVariant, ButtonSize } from './primitives/button/Button';
 
-export { Code } from './code';
-export type { } from './code';
+export { Badge } from './primitives/badge/Badge';
+export type { BadgeProps, BadgeVariant } from './primitives/badge/Badge';
 
-export { Badge } from './badge';
-export type { } from './badge';
+export {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from './primitives/card/Card';
+export type { CardProps, CardPadding } from './primitives/card/Card';
 
-export { Spinner } from './spinner';
-export type { } from './spinner';
+export { Spinner } from './primitives/spinner/Spinner';
+export type { SpinnerProps, SpinnerSize } from './primitives/spinner/Spinner';
+
+export { Code } from './primitives/code/Code';
+export type { CodeProps } from './primitives/code/Code';
+
+export { Input } from './primitives/input/Input';
+export type { InputProps } from './primitives/input/Input';
+
+export { Avatar } from './primitives/avatar/Avatar';
+export type { AvatarProps, AvatarSize } from './primitives/avatar/Avatar';
+
+// ── Feedback ──────────────────────────────────────────────────────────────────
+export { Alert } from './feedback/alert/Alert';
+export type { AlertProps, AlertVariant } from './feedback/alert/Alert';
+
+export { Progress } from './feedback/progress/Progress';
+export type { ProgressProps, ProgressSize } from './feedback/progress/Progress';
+
+// ── Genesis platform components ───────────────────────────────────────────────
+export { StatusBadge } from './genesis/status-badge/StatusBadge';
+export type { StatusBadgeProps, PlatformStatus } from './genesis/status-badge/StatusBadge';
+
+export { ProgressSteps } from './genesis/progress-steps/ProgressSteps';
+export type { ProgressStepsProps, Step, StepState } from './genesis/progress-steps/ProgressSteps';
+
+export { ErrorPanel } from './genesis/error-panel/ErrorPanel';
+export type { ErrorPanelProps } from './genesis/error-panel/ErrorPanel';

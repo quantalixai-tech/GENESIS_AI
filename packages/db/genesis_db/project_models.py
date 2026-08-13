@@ -171,7 +171,7 @@ class ConversationMessage(SQLModel, table=True):
         max_length=50,
         description="Semantic type of this message",
     )
-    metadata: dict | None = Field(
+    message_metadata: dict | None = Field(
         default=None,
         sa_column=Column(JSON),
         description="Additional structured data (e.g., requirement IDs, approval state)",
