@@ -231,6 +231,7 @@ dependencies = [
     { name = "gitpython" },
     { name = "litellm" },
     { name = "nats-py" },
+    { name = "ollama" },
     { name = "passlib", extra = ["bcrypt"] },
     { name = "pydantic", extra = ["email"] },
     { name = "pydantic-settings" },
@@ -247,6 +248,7 @@ requires-dist = [
     { name = "gitpython", specifier = ">=3.1.43" },
     { name = "litellm", specifier = ">=1.44.0" },
     { name = "nats-py", specifier = ">=2.7.0" },
+    { name = "ollama", specifier = ">=0.6.2" },
     { name = "passlib", extras = ["bcrypt"], specifier = ">=1.7.4" },
     { name = "pydantic", extras = ["email"], specifier = ">=2.7.0" },
     { name = "pydantic-settings", specifier = ">=2.3.0" },
@@ -1804,6 +1806,19 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/02/f0/fc5e93f2b0dd14a202590ad9d30eda1955ea872039b5204357348d0f4b1e/nats_py-2.15.0.tar.gz", hash = "sha256:6622c547d9a7d2313d9c147d46c386188f4ec2c7b5c9f9a0438a4d1b55f54a93", size = 75995, upload-time = "2026-06-05T07:34:03.904Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/db/a8/b55606c7c621fb813c8ec78baf201d2c78bf6051091ec0c7ada572999e95/nats_py-2.15.0-py3-none-any.whl", hash = "sha256:9f8d36aa52a9926a88b8f1d70cf1fdce0ad387941479b500ee9ab3e51073cefd", size = 90334, upload-time = "2026-06-05T07:34:02.81Z" },
+]
+
+[[package]]
+name = "ollama"
+version = "0.6.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "pydantic" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/fc/72/5f12423b6b39ca8430fbe56f77fcf4ef60f63067c7c4a2e30e200ed9ec16/ollama-0.6.2.tar.gz", hash = "sha256:936d55daa684f474364c098611c933626f8d6c7d67065c5b7ae0c477b508b07f", size = 53145, upload-time = "2026-04-29T21:21:15.018Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c4/ab/d6722beeb2d10f7a3b9ff49375708904fde18f82b5609a0bc4aeb5996a4d/ollama-0.6.2-py3-none-any.whl", hash = "sha256:3ad7daab28e5a973445c36a73882a3ef698c2ebb00e21e308652741577509f7d", size = 15115, upload-time = "2026-04-29T21:21:13.794Z" },
 ]
 
 [[package]]
@@ -3497,12 +3512,18 @@ source = { virtual = "apps/worker" }
 dependencies = [
     { name = "genesis-db" },
     { name = "nats-py" },
+    { name = "ollama" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "genesis-db", editable = "packages/db" },
     { name = "nats-py", specifier = ">=2.7.2" },
+    { name = "ollama", specifier = ">=0.6.2" },
+    { name = "pydantic", specifier = ">=2.13.4" },
+    { name = "pydantic-settings", specifier = ">=2.15.0" },
 ]
 
 [[package]]

@@ -20,48 +20,23 @@ Environment variables:
 """
 
 import asyncio
-import logging
-import os
 import sys
-from datetime import datetime, timezone
 
 import nats
 from nats.errors import ConnectionClosedError, NoServersError, TimeoutError
 
-# ---------------------------------------------------------------------------
-# Logging setup
-# ---------------------------------------------------------------------------
+from core.config import settings
+from core.logging import get_logger
 
-log_level_name = os.environ.get("GENESIS_LOG_LEVEL", "info").upper()
-log_level = getattr(logging, log_level_name, logging.INFO)
-
-logging.basicConfig(
-    level=log_level,
-    format="timestamp=%(asctime)s level=%(levelname)s logger=%(name)s msg=\"%(message)s\"",
-    datefmt="%Y-%m-%dT%H:%M:%SZ",
-    stream=sys.stdout,
-)
-logger = logging.getLogger("genesis.worker")
-
-# ---------------------------------------------------------------------------
-# Configuration
-# ---------------------------------------------------------------------------
-
-NATS_URL = os.environ.get("NATS_URL", "nats://localhost:4222")
-GENESIS_ENV = os.environ.get("GENESIS_ENV", "development")
-
+logger = get_logger("genesis.worker")
 
 # ---------------------------------------------------------------------------
 # Message handlers
 # ---------------------------------------------------------------------------
 
-
 async def message_handler(msg) -> None:
     """
     Default message handler for genesis.worker.> subject.
-
-    Phase 0.3: Logs received messages and acknowledges them.
-    Phase 1.0+: Routes to domain-specific handlers based on subject.
     """
     subject = msg.subject
     data = msg.data.decode("utf-8", errors="replace")
@@ -74,30 +49,38 @@ async def message_handler(msg) -> None:
         },
     )
 
-    # TODO(phase-1.0): Route to domain handlers based on subject prefix
-    # Examples:
-    #   genesis.project.created   → project_handlers.handle_project_created
-    #   genesis.agent.run.start   → agent_handlers.handle_agent_run_start
-    #   genesis.build.complete    → build_handlers.handle_build_complete
+async def agent_invoke_handler(msg) -> None:
+    """
+    Handler for genesis.agent.invoke subject.
+    """
+    subject = msg.subject
+    data = msg.data.decode("utf-8", errors="replace")
+    
+    logger.info("Agent invocation received", extra={"subject": subject})
+    # TODO: Phase 4 AI Engine parsing and routing
+    
+    # Acknowledge the message if it's a JetStream msg
+    try:
+        await msg.ack()
+    except Exception:
+        pass
 
 
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
-
 async def main() -> None:
     logger.info(
         "Genesis Worker starting",
-        extra={"nats_url": NATS_URL, "environment": GENESIS_ENV},
+        extra={"nats_url": settings.nats_url, "environment": settings.genesis_env},
     )
 
     nc = None
     try:
         nc = await nats.connect(
-            NATS_URL,
+            settings.nats_url,
             name="genesis-worker",
-            # Reconnection strategy: attempt up to 10 times with 2s delay
             max_reconnect_attempts=10,
             reconnect_time_wait=2,
             error_cb=_on_error,
@@ -108,7 +91,8 @@ async def main() -> None:
         logger.info("Connected to NATS")
 
         sub = await nc.subscribe("genesis.worker.>", cb=message_handler)
-        logger.info("Subscribed to genesis.worker.>")
+        agent_sub = await nc.subscribe("genesis.agent.invoke", cb=agent_invoke_handler)
+        logger.info("Subscribed to genesis.worker.> and genesis.agent.invoke")
 
         # Keep the worker alive — rely on NATS callbacks for error handling
         try:
@@ -151,3 +135,7 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         logger.info("Worker interrupted by user")
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print(f"FATAL ERROR: {e}")
