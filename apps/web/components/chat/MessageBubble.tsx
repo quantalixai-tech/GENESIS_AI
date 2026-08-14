@@ -1,5 +1,4 @@
 import React from 'react';
-import { Avatar } from '@genesis/ui';
 import styles from './chat.module.css';
 import ReactMarkdown from 'react-markdown';
 import { type Message } from '../../lib/hooks/use-chat';
@@ -8,10 +7,19 @@ export function MessageBubble({ message }: { message: Message }) {
   const isUser = message.role === 'user';
 
   return (
-    <div className={`${styles.messageWrapper} ${isUser ? styles.messageUser : styles.messageAssistant}`}>
+    <div
+      className={`${styles.messageWrapper} ${isUser ? styles.messageUser : styles.messageAssistant}`}
+    >
+      {/* AI avatar */}
       {!isUser && (
-        <Avatar name="Genesis AI" className={styles.avatar} size="sm" />
+        <div className={styles.avatarWrap}>
+          <div className={styles.avatarAi} title="Genesis AI">
+            ⬡
+          </div>
+        </div>
       )}
+
+      {/* Bubble */}
       <div className={`${styles.bubble} ${isUser ? styles.bubbleUser : styles.bubbleAssistant}`}>
         {isUser ? (
           <p className={styles.messageText}>{message.content}</p>
@@ -20,13 +28,19 @@ export function MessageBubble({ message }: { message: Message }) {
             {message.content ? (
               <ReactMarkdown>{message.content}</ReactMarkdown>
             ) : message.isStreaming ? (
-              <span className={styles.cursor}></span>
+              <span className={styles.cursor} aria-label="Generating…" />
             ) : null}
           </div>
         )}
       </div>
+
+      {/* User avatar */}
       {isUser && (
-        <Avatar name="User" className={styles.avatar} size="sm" />
+        <div className={styles.avatarWrap}>
+          <div className={styles.avatarUser} title="You">
+            U
+          </div>
+        </div>
       )}
     </div>
   );

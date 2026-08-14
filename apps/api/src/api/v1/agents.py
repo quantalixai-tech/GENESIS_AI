@@ -21,9 +21,9 @@ from fastapi import APIRouter, Depends
 from sqlmodel import Session
 
 import genesis_db
-from genesis_db import get_session
 from core.errors import ErrorCode, ForbiddenError, NotFoundError
 from core.security import get_current_user
+from genesis_db import get_session
 from schemas.agents import (
     AgentInvokeRequest,
     AgentInvokeResponse,

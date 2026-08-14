@@ -112,9 +112,7 @@ def upgrade() -> None:
         ),
         sa.Column("metadata", sa.JSON(), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["conversation_id"], ["conversation.id"], ondelete="CASCADE"
-        ),
+        sa.ForeignKeyConstraint(["conversation_id"], ["conversation.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(
@@ -481,9 +479,7 @@ def upgrade() -> None:
         sa.Column("project_id", sa.Uuid(), nullable=False),
         sa.Column("commit_id", sa.Uuid(), nullable=True),
         sa.Column("task_id", sa.Uuid(), nullable=True),
-        sa.Column(
-            "validation_type", sqlmodel.sql.sqltypes.AutoString(length=30), nullable=False
-        ),
+        sa.Column("validation_type", sqlmodel.sql.sqltypes.AutoString(length=30), nullable=False),
         sa.Column(
             "status",
             sqlmodel.sql.sqltypes.AutoString(length=20),
@@ -498,9 +494,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["project_id"], ["project.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        "ix_validation_run_project_id", "validation_run", ["project_id"], unique=False
-    )
+    op.create_index("ix_validation_run_project_id", "validation_run", ["project_id"], unique=False)
     op.create_index("ix_validation_run_status", "validation_run", ["status"], unique=False)
 
     # -------------------------------------------------------------------------
@@ -532,14 +526,10 @@ def upgrade() -> None:
         ),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(["project_id"], ["project.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(
-            ["validation_run_id"], ["validation_run.id"], ondelete="SET NULL"
-        ),
+        sa.ForeignKeyConstraint(["validation_run_id"], ["validation_run.id"], ondelete="SET NULL"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        "ix_project_error_project_id", "project_error", ["project_id"], unique=False
-    )
+    op.create_index("ix_project_error_project_id", "project_error", ["project_id"], unique=False)
     op.create_index(
         "ix_project_error_validation_run_id",
         "project_error",
@@ -727,9 +717,7 @@ def downgrade() -> None:
     op.drop_index("ix_requirement_project_id", table_name="requirement")
     op.drop_table("requirement")
 
-    op.drop_index(
-        "ix_conversation_message_conversation_id", table_name="conversation_message"
-    )
+    op.drop_index("ix_conversation_message_conversation_id", table_name="conversation_message")
     op.drop_table("conversation_message")
 
     op.drop_index("ix_conversation_project_id", table_name="conversation")

@@ -23,16 +23,18 @@ import asyncio
 import sys
 
 import nats
-from nats.errors import ConnectionClosedError, NoServersError, TimeoutError
+from nats.errors import NoServersError
 
 from core.config import settings
 from core.logging import get_logger
+from services.orchestrator import process_agent_invoke
 
 logger = get_logger("genesis.worker")
 
 # ---------------------------------------------------------------------------
 # Message handlers
 # ---------------------------------------------------------------------------
+
 
 async def message_handler(msg) -> None:
     """
@@ -49,16 +51,21 @@ async def message_handler(msg) -> None:
         },
     )
 
+
 async def agent_invoke_handler(msg) -> None:
     """
     Handler for genesis.agent.invoke subject.
     """
     subject = msg.subject
     data = msg.data.decode("utf-8", errors="replace")
-    
+
     logger.info("Agent invocation received", extra={"subject": subject})
-    # TODO: Phase 4 AI Engine parsing and routing
-    
+
+    try:
+        await process_agent_invoke(data)
+    except Exception as e:
+        logger.error(f"Failed to process agent invocation: {e}")
+
     # Acknowledge the message if it's a JetStream msg
     try:
         await msg.ack()
@@ -69,6 +76,7 @@ async def agent_invoke_handler(msg) -> None:
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 async def main() -> None:
     logger.info(
@@ -81,7 +89,7 @@ async def main() -> None:
         nc = await nats.connect(
             settings.nats_url,
             name="genesis-worker",
-            max_reconnect_attempts=10,
+            max_reconnect_attempts=-1,
             reconnect_time_wait=2,
             error_cb=_on_error,
             disconnected_cb=_on_disconnect,
@@ -90,8 +98,20 @@ async def main() -> None:
         )
         logger.info("Connected to NATS")
 
+        # Register Agents
+        from agents.implementations.coding_agent import CodingAgent
+        from agents.implementations.requirement_agent import RequirementAgent
+        from agents.registry import get_agent_registry
+
+        registry = get_agent_registry()
+        registry.register("requirement_agent", RequirementAgent)
+        registry.register("coding_agent", CodingAgent)
+        logger.info("Registered agents with AgentRegistryService")
+
+        _js = nc.jetstream()  # Reserved for future JetStream consumers
+
         sub = await nc.subscribe("genesis.worker.>", cb=message_handler)
-        agent_sub = await nc.subscribe("genesis.agent.invoke", cb=agent_invoke_handler)
+        _agent_sub = await nc.subscribe("genesis.agent.invoke", cb=agent_invoke_handler)
         logger.info("Subscribed to genesis.worker.> and genesis.agent.invoke")
 
         # Keep the worker alive — rely on NATS callbacks for error handling
@@ -103,7 +123,10 @@ async def main() -> None:
             await sub.unsubscribe()
 
     except NoServersError:
-        logger.error("Could not connect to NATS — no servers available", extra={"nats_url": NATS_URL})
+        logger.error(
+            "Could not connect to NATS — no servers available",
+            extra={"nats_url": settings.nats_url},
+        )
         sys.exit(1)
     except Exception as exc:
         logger.exception("Unexpected worker error: %s", exc)
@@ -137,5 +160,6 @@ if __name__ == "__main__":
         logger.info("Worker interrupted by user")
     except Exception as e:
         import traceback
+
         traceback.print_exc()
         print(f"FATAL ERROR: {e}")

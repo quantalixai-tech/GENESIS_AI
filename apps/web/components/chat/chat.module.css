@@ -1,51 +1,97 @@
-@reference "../globals.css";
+@reference "../../globals.css";
 
+/* ── Chat container ───────────────────────────────────── */
 .chatContainer {
-  @apply flex h-full w-full flex-col bg-background border-r border-border;
+  @apply flex h-full w-full flex-col bg-background;
 }
 
+/* ── Message list ─────────────────────────────────────── */
 .messageList {
-  @apply flex flex-1 flex-col gap-6 overflow-y-auto p-6;
+  @apply flex flex-1 flex-col gap-5 overflow-y-auto px-4 py-5;
+  scroll-behavior: smooth;
 }
 
+/* ── Empty state ──────────────────────────────────────── */
 .emptyState {
-  @apply flex h-full flex-col items-center justify-center text-center text-muted-foreground;
+  @apply flex h-full flex-col items-center justify-center text-center;
 }
 
+.emptyLogo {
+  @apply mb-5 text-4xl leading-none text-primary;
+  text-shadow: 0 0 20px var(--color-primary);
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.emptyHeading {
+  @apply mb-2 text-base font-semibold text-foreground;
+}
+
+.emptyHint {
+  @apply mb-6 max-w-[260px] text-sm text-muted-foreground leading-relaxed;
+}
+
+.emptySuggestions {
+  @apply flex flex-col gap-2 w-full max-w-[280px];
+}
+
+.suggestionBtn {
+  @apply cursor-pointer rounded-lg border border-border bg-muted/30 px-3 py-2 text-left text-xs text-muted-foreground transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-foreground;
+}
+
+/* ── Message wrapper ──────────────────────────────────── */
 .messageWrapper {
-  @apply flex gap-4 max-w-[80%];
+  @apply flex gap-3;
+  max-width: 88%;
 }
 
 .messageUser {
-  @apply self-end flex-row;
+  @apply self-end flex-row-reverse;
 }
 
 .messageAssistant {
   @apply self-start flex-row;
 }
 
-.avatar {
+/* ── Avatars ──────────────────────────────────────────── */
+.avatarWrap {
   @apply shrink-0;
 }
 
+.avatarAi {
+  @apply flex h-7 w-7 items-center justify-center rounded-full text-base;
+  background: linear-gradient(135deg, var(--color-primary), #7c3aed);
+  box-shadow: 0 0 10px var(--color-primary-glow);
+}
+
+.avatarUser {
+  @apply flex h-7 w-7 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground;
+}
+
+/* ── Bubbles ──────────────────────────────────────────── */
 .bubble {
-  @apply rounded-xl p-4 text-sm leading-relaxed;
+  @apply rounded-2xl px-4 py-3 text-sm leading-relaxed;
 }
 
 .bubbleUser {
-  @apply rounded-br-sm bg-primary text-primary-foreground;
+  @apply rounded-tr-sm bg-primary text-primary-foreground;
 }
 
 .bubbleAssistant {
-  @apply rounded-bl-sm border border-border bg-card text-card-foreground;
+  @apply rounded-tl-sm border border-border bg-card text-card-foreground;
 }
 
 .messageText {
   @apply m-0 whitespace-pre-wrap;
 }
 
+/* ── Markdown ─────────────────────────────────────────── */
 .markdownContent p {
-  @apply mt-0 mb-2;
+  @apply mt-0 mb-3;
 }
 
 .markdownContent p:last-child {
@@ -53,16 +99,25 @@
 }
 
 .markdownContent pre {
-  @apply my-2 overflow-x-auto rounded-md bg-muted p-3;
+  @apply my-3 overflow-x-auto rounded-lg bg-muted p-3 text-xs;
 }
 
 .markdownContent code {
-  @apply rounded-sm bg-muted px-1.5 py-0.5 font-mono;
+  @apply rounded bg-muted px-1.5 py-0.5 font-mono text-xs;
 }
 
+.markdownContent ul, .markdownContent ol {
+  @apply my-2 ml-4;
+}
+
+.markdownContent li {
+  @apply mb-1;
+}
+
+/* ── Streaming cursor ─────────────────────────────────── */
 .cursor {
-  @apply ml-1 inline-block h-[1em] w-2 align-middle bg-current;
-  animation: blink 1s step-end infinite;
+  @apply ml-0.5 inline-block h-[0.9em] w-[2px] align-middle bg-primary;
+  animation: blink 0.8s step-end infinite;
 }
 
 @keyframes blink {
@@ -70,72 +125,152 @@
   50% { opacity: 0; }
 }
 
+/* ── Typing indicator ─────────────────────────────────── */
 .typingIndicator {
-  @apply flex items-center gap-2 p-4 text-sm text-muted-foreground;
+  @apply self-start flex items-center gap-3 rounded-2xl rounded-tl-sm border border-border bg-card px-4 py-3;
 }
 
+.typingDots {
+  @apply flex items-center gap-1;
+}
+
+.typingDot {
+  @apply h-1.5 w-1.5 rounded-full bg-primary;
+}
+
+.typingDot:nth-child(1) { animation: dotBounce 1.2s ease-in-out infinite; }
+.typingDot:nth-child(2) { animation: dotBounce 1.2s ease-in-out 0.2s infinite; }
+.typingDot:nth-child(3) { animation: dotBounce 1.2s ease-in-out 0.4s infinite; }
+
+@keyframes dotBounce {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50% { transform: translateY(-4px); opacity: 1; }
+}
+
+.typingText {
+  @apply text-xs text-muted-foreground;
+}
+
+/* ── Error message ────────────────────────────────────── */
 .errorMessage {
-  @apply p-4 text-center text-sm text-destructive;
+  @apply self-center rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-2 text-center text-xs text-destructive;
 }
 
+/* ── Input form ───────────────────────────────────────── */
 .inputForm {
-  @apply flex gap-3 border-t border-border bg-card p-4 sm:px-6;
+  @apply relative border-t border-border bg-background p-3;
 }
 
-.inputField {
-  @apply flex-1;
+.inputRow {
+  @apply flex items-end gap-2 rounded-xl border border-border bg-card p-1 transition-all;
 }
 
-/* Requirements Panel */
+.inputRow:focus-within {
+  @apply border-primary/40 ring-2 ring-primary/10;
+}
 
+.inputTextarea {
+  @apply flex-1 resize-none bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground;
+  max-height: 120px;
+  line-height: 1.5;
+}
+
+.sendBtn {
+  @apply flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg border-0 transition-all;
+  background: linear-gradient(135deg, var(--color-primary), #7c3aed);
+}
+
+.sendBtn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: scale(1.05);
+}
+
+.sendBtn:disabled {
+  @apply opacity-30 cursor-not-allowed;
+}
+
+.sendIcon {
+  @apply text-xs text-white;
+}
+
+/* ── Agent activity bar ───────────────────────────────── */
+.agentActivity {
+  @apply flex items-center gap-2 px-3 pt-1.5 text-xs text-muted-foreground;
+}
+
+.agentDot {
+  @apply h-1 w-1 shrink-0 rounded-full bg-primary;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* ── Requirements Panel ───────────────────────────────── */
 .requirementsPanel {
-  @apply flex w-[400px] flex-col border-l border-border bg-background;
-}
-
-.panelTitle {
-  @apply m-0 border-b border-border p-4 sm:px-6 text-base font-semibold;
-}
-
-.emptyRequirements {
-  @apply p-6 text-center text-sm text-muted-foreground;
+  @apply flex flex-col overflow-hidden;
+  height: 100%;
 }
 
 .requirementsList {
-  @apply flex flex-1 flex-col gap-3 overflow-y-auto p-4;
+  @apply flex flex-1 flex-col gap-3 overflow-y-auto p-3;
+}
+
+.emptyRequirements {
+  @apply flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center;
+}
+
+.emptyReqIcon {
+  @apply text-3xl;
+}
+
+.emptyReqText {
+  @apply max-w-[200px] text-xs leading-relaxed text-muted-foreground;
 }
 
 .reqCard {
-  @apply bg-card;
+  @apply rounded-xl border border-border bg-card/50 p-3 transition-colors hover:border-primary/20 hover:bg-card;
 }
 
 .reqHeader {
-  @apply p-3 pb-0;
+  @apply mb-2 flex items-start justify-between gap-2;
 }
 
 .reqTitle {
-  @apply text-sm;
+  @apply text-xs font-semibold text-foreground leading-snug;
 }
 
-.reqBody {
-  @apply p-3 text-xs text-muted-foreground;
+.reqDesc {
+  @apply mb-3 text-xs text-muted-foreground leading-relaxed;
+  margin: 0 0 8px;
 }
 
 .reqMeta {
-  @apply mt-3 flex gap-2;
+  @apply flex flex-wrap gap-1.5;
 }
 
 .badge {
-  @apply rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase text-foreground;
+  @apply rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide;
+}
+
+.badgeCategory {
+  @apply bg-muted text-muted-foreground;
 }
 
 .badgeHigh {
-  @apply bg-destructive text-destructive-foreground;
+  @apply bg-destructive/10 text-destructive;
 }
 
 .badgeMedium {
-  @apply bg-primary text-primary-foreground;
+  @apply bg-primary/10 text-primary;
 }
 
 .badgeLow {
-  @apply bg-secondary text-secondary-foreground;
+  @apply bg-muted text-muted-foreground;
+}
+
+.reqStatusDot {
+  @apply mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-success;
 }

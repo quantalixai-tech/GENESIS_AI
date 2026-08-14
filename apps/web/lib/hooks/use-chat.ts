@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { fetchClientApi } from '../api';
 
 export interface Message {
@@ -9,12 +9,12 @@ export interface Message {
   isStreaming?: boolean;
 }
 
-export function useChat(projectId: string, conversationId: string | null) {
+export function useChat(projectId: string) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // We need to fetch existing messages if conversationId is provided
+  // Fetch existing messages for a given conversation
   const loadMessages = useCallback(async (convId: string) => {
     try {
       const data = await fetchClientApi(`/projects/${projectId}/conversations/${convId}/messages`);

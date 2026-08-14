@@ -1,0 +1,61 @@
+@reference "../../../globals.css";
+
+/* ── 3-panel workspace ───────────────────────────────── */
+.workspace {
+  @apply flex h-full w-full overflow-hidden;
+}
+
+/* ── Top header bar ──────────────────────────────────── */
+.headerBar {
+  @apply flex h-12 shrink-0 items-center justify-between border-b border-border bg-background/80 px-4;
+  backdrop-filter: blur(8px);
+}
+
+.projectMeta {
+  @apply flex items-center gap-3;
+}
+
+.projectName {
+  @apply text-sm font-semibold text-foreground;
+}
+
+.statusDot {
+  @apply inline-block h-1.5 w-1.5 rounded-full bg-success;
+  box-shadow: 0 0 6px var(--color-success);
+}
+
+.headerActions {
+  @apply flex items-center gap-2;
+}
+
+/* ── Panel: Chat ─────────────────────────────────────── */
+.chatPanel {
+  @apply flex min-w-0 flex-col border-r border-border;
+  flex: 1 1 35%;
+}
+
+.panelHeader {
+  @apply flex h-10 shrink-0 items-center border-b border-border px-4;
+  background: linear-gradient(to bottom, var(--color-muted), transparent);
+}
+
+.panelLabel {
+  @apply text-xs font-semibold uppercase tracking-widest text-muted-foreground;
+}
+
+/* ── Panel: Preview ──────────────────────────────────── */
+.previewPanel {
+  @apply flex min-w-0 flex-col border-r border-border;
+  flex: 2 1 42%;
+}
+
+/* ── Panel: Requirements ─────────────────────────────── */
+.requirementsPanel {
+  @apply flex min-w-0 flex-col;
+  flex: 1 1 23%;
+}
+
+/* ── Panel fill ──────────────────────────────────────── */
+.panelFill {
+  @apply flex flex-1 flex-col overflow-hidden;
+}

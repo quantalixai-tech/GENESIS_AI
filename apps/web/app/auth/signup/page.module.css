@@ -1,0 +1,71 @@
+@reference "../../../globals.css";
+
+.main {
+  @apply relative flex min-h-screen items-center justify-center overflow-hidden p-8;
+}
+
+.orb {
+  @apply pointer-events-none absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full;
+  background: radial-gradient(circle, var(--color-primary-glow) 0%, transparent 60%);
+  animation: pulse 8s ease-in-out infinite alternate;
+}
+
+.orbSecondary {
+  @apply pointer-events-none absolute right-[10%] top-[20%] h-[400px] w-[400px] rounded-full;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 60%);
+  animation: pulse 6s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes pulse {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+  100% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.5; }
+}
+
+.container {
+  @apply relative z-10 w-full max-w-[420px] rounded-xl border border-border bg-card/80 p-10 shadow-2xl backdrop-blur-xl;
+}
+
+.header {
+  @apply mb-10 text-center;
+}
+
+.logo {
+  @apply mb-4 text-4xl leading-none text-primary;
+  text-shadow: 0 0 20px var(--color-primary-glow);
+}
+
+.title {
+  @apply mb-2 text-2xl font-semibold tracking-tight text-foreground;
+}
+
+.subtitle {
+  @apply text-sm text-muted-foreground;
+}
+
+.form {
+  @apply flex flex-col gap-5;
+}
+
+.submitBtn {
+  @apply mt-2;
+}
+
+.footer {
+  @apply mt-8 text-center;
+}
+
+.footerText {
+  @apply text-sm text-muted-foreground;
+}
+
+.link {
+  @apply font-medium text-primary transition-colors hover:text-primary-light;
+}
+
+.link:hover {
+  text-shadow: 0 0 8px var(--color-primary-glow);
+}
+
+.errorAlert {
+  @apply mb-5;
+}

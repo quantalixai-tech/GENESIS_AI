@@ -40,17 +40,17 @@ def signup(
     - Returns a JWT access token on success and sets HttpOnly cookie
     """
     user, token = auth_service.create_user(session, request)
-    
+
     response.set_cookie(
         key="genesis_token",
         value=token,
         httponly=True,
         samesite="lax",
-        secure=False, # Set to True in production based on environment
+        secure=False,  # Set to True in production based on environment
         max_age=60 * 60 * 24 * 7,
         path="/",
     )
-    
+
     return LoginResponse(
         access_token=token,
         user=UserResponse.model_validate(user),
@@ -60,6 +60,7 @@ def signup(
 class LoginRequest(BaseModel):
     email: str
     password: str
+
 
 @router.post(
     "/login",
@@ -80,7 +81,7 @@ def login(
     user, token = auth_service.authenticate_user(
         session, email=request.email, password=request.password
     )
-    
+
     response.set_cookie(
         key="genesis_token",
         value=token,
@@ -90,11 +91,12 @@ def login(
         max_age=60 * 60 * 24 * 7,
         path="/",
     )
-    
+
     return LoginResponse(
         access_token=token,
         user=UserResponse.model_validate(user),
     )
+
 
 @router.post(
     "/logout",
@@ -104,7 +106,6 @@ def login(
 def logout(response: Response) -> None:
     """Log out by clearing the genesis_token cookie."""
     response.delete_cookie("genesis_token", path="/")
-
 
 
 @router.get(

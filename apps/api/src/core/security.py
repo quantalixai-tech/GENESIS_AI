@@ -19,12 +19,12 @@ Security properties:
 
 from datetime import UTC, datetime, timedelta
 
+import bcrypt
 import jwt
 from fastapi import Depends, Request
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from sqlmodel import Session
-import bcrypt
 
 import genesis_db
 from core.config import settings
@@ -32,17 +32,19 @@ from core.errors import ErrorCode, UnauthorizedError
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login", auto_error=False)
 
+
 class TokenData(BaseModel):
     user_id: str | None = None
 
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Return True if plain_password matches the stored bcrypt hash."""
-    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+    return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 
 def get_password_hash(password: str) -> str:
     """Return a bcrypt hash of the given password."""
-    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:

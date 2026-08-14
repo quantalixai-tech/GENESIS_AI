@@ -56,18 +56,21 @@ export function registerDevCommand(program: Command): void {
     )
     .option('--api', 'Start API only')
     .option('--web', 'Start web only')
+    .option('--worker', 'Start worker only')
     .option('--port-api <port>', 'API port', '8080')
     .option('--port-web <port>', 'Web port', '3000')
     .action(
       async (opts: {
         api: boolean;
         web: boolean;
+        worker: boolean;
         portApi: string;
         portWeb: string;
       }) => {
-        const apiOnly = opts.api && !opts.web;
-        const webOnly = opts.web && !opts.api;
-        const both = !apiOnly && !webOnly;
+        const startAll = !opts.api && !opts.web && !opts.worker;
+        const startApi = startAll || opts.api;
+        const startWeb = startAll || opts.web;
+        const startWorker = startAll || opts.worker;
 
         logStep('Genesis Dev Mode');
         logInfo(
@@ -90,8 +93,8 @@ export function registerDevCommand(program: Command): void {
         const pgDb = dotenv['POSTGRES_DB'] ?? 'genesis';
         const databaseUrl = `postgresql://${pgUser}:${pgPass}@${pgHost}:${pgPort}/${pgDb}`;
 
-        // Check postgres is up (required for API)
-        if (!webOnly) {
+        // Check postgres is up (required for API and Worker)
+        if (startApi || startWorker) {
           const pgOk = await isPortListening(parseInt(pgPort, 10), pgHost);
           if (!pgOk) {
             logErr(`PostgreSQL is not reachable on ${pgHost}:${pgPort}.`);
@@ -109,7 +112,7 @@ export function registerDevCommand(program: Command): void {
         const procs: Promise<void>[] = [];
 
         // === API dev process ===
-        if (!webOnly) {
+        if (startApi) {
           logInfo(`Starting API on :${opts.portApi} with hot-reload`);
 
           const apiEnv = {
@@ -175,7 +178,7 @@ export function registerDevCommand(program: Command): void {
         }
 
         // === Web dev process ===
-        if (!apiOnly) {
+        if (startWeb) {
           logInfo(`Starting Web on :${opts.portWeb} with HMR`);
 
           const webProc = (async () => {
@@ -222,12 +225,70 @@ export function registerDevCommand(program: Command): void {
           procs.push(webProc);
         }
 
+        // === Worker dev process ===
+        if (startWorker) {
+          logInfo(`Starting Worker with hot-reload`);
+
+          const workerSrc = path.join(REPO_ROOT, 'apps/worker/src');
+          const pkgDir = path.join(REPO_ROOT, 'packages');
+          const workerEnv = {
+            ...mergedEnv,
+            PYTHONUNBUFFERED: '1',
+            DATABASE_URL: databaseUrl,
+            PYTHONPATH: `${workerSrc}:${pkgDb}:${pkgDir}${process.env['PYTHONPATH'] ? `:${process.env['PYTHONPATH']}` : ''}`,
+          };
+
+          const workerProc = (async () => {
+            try {
+              const proc = execa(
+                'uv',
+                [
+                  'run',
+                  '--package',
+                  'worker',
+                  'python',
+                  'main.py'
+                ],
+                {
+                  cwd: workerSrc,
+                  env: workerEnv,
+                  stdio: 'pipe',
+                },
+              );
+
+              const prefix = chalk.hex('#f59e0b')('[work] ');
+              proc.stdout?.on('data', (d: Buffer) => {
+                for (const line of d.toString().split('\n').filter(Boolean)) {
+                  process.stdout.write(prefix + line + '\n');
+                }
+              });
+              proc.stderr?.on('data', (d: Buffer) => {
+                for (const line of d.toString().split('\n').filter(Boolean)) {
+                  process.stdout.write(prefix + chalk.yellow(line) + '\n');
+                }
+              });
+
+              await proc;
+            } catch (err: unknown) {
+              const isExeca =
+                typeof err === 'object' && err !== null && 'signal' in err;
+              if (isExeca && (err as { signal?: string }).signal === 'SIGINT')
+                return;
+              logErr(
+                `Worker process exited: ${err instanceof Error ? err.message : String(err)}`,
+              );
+            }
+          })();
+
+          procs.push(workerProc);
+        }
+
         console.log('');
-        if (both || !webOnly)
+        if (startApi)
           console.log(
             `  ${c.info('API')}  → http://localhost:${opts.portApi}/docs`,
           );
-        if (both || !apiOnly)
+        if (startWeb)
           console.log(`  ${c.ok('Web')}  → http://localhost:${opts.portWeb}`);
         console.log('');
         console.log(`  ${c.muted('Press Ctrl+C to stop.')}`);

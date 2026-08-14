@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Input, Alert } from '@genesis/ui';
 import { fetchClientApi, ApiError } from '../../../lib/api';
-import styles from '../login/page.module.css'; // Reusing login styles for consistency
+import styles from './page.module.css';
 import Link from 'next/link';
 
 export default function SignupPage() {

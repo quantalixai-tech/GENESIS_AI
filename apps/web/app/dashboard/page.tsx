@@ -1,10 +1,12 @@
-import { fetchServerApi, ApiError } from '../../lib/api';
-import { redirect } from 'next/navigation';
-import { Button, StatusBadge, CardHeader, CardTitle, CardFooter } from '@genesis/ui';
+'use client';
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button, StatusBadge, CardHeader, CardTitle, CardFooter, Spinner } from '@genesis/ui';
+import { fetchClientApi, ApiError } from '../../lib/api';
+import { NewProjectModal } from './NewProjectModal';
 import styles from './page.module.css';
 import Link from 'next/link';
-
-export const dynamic = 'force-dynamic';
 
 interface UserResponse {
   id: string;
@@ -28,103 +30,166 @@ interface ProjectResponse {
   updated_at: string;
 }
 
-export default async function DashboardPage() {
-  let user: UserResponse | null = null;
-  let workspaces: WorkspaceResponse[] = [];
-  let projects: ProjectResponse[] = [];
+export default function DashboardPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<UserResponse | null>(null);
+  const [workspaces, setWorkspaces] = useState<WorkspaceResponse[]>([]);
+  const [projects, setProjects] = useState<ProjectResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
 
-  try {
-    // 1. Fetch current user
-    user = (await fetchServerApi('/auth/me')) as UserResponse;
+  const loadData = useCallback(async () => {
+    try {
+      const u = (await fetchClientApi('/auth/me')) as UserResponse;
+      setUser(u);
 
-    // 2. Fetch workspaces
-    workspaces = (await fetchServerApi('/workspaces')) as WorkspaceResponse[];
+      const ws = (await fetchClientApi('/workspaces')) as WorkspaceResponse[];
+      setWorkspaces(ws);
 
-    // 3. If they have a workspace, fetch projects for the first one
-    if (workspaces.length > 0) {
-      projects = (await fetchServerApi(
-        `/projects/?workspace_id=${workspaces[0]?.id ?? ''}`,
-      )) as ProjectResponse[];
+      if (ws.length > 0) {
+        const ps = (await fetchClientApi(
+          `/projects/?workspace_id=${ws[0]?.id ?? ''}`,
+        )) as ProjectResponse[];
+        setProjects(ps);
+      }
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        router.push('/auth/login');
+      }
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 401) {
-      redirect('/auth/login');
-    }
-    // For other errors, let Next.js error boundary handle it, or show empty state
-    console.error('Dashboard fetch error:', error);
+  }, [router]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const defaultWorkspace = workspaces[0] ?? null;
+
+  const handleModalClose = () => {
+    setModalOpen(false);
+    // Refresh projects in case one was created
+    loadData();
+  };
+
+  if (loading) {
+    return (
+      <div className={styles.loadingScreen}>
+        <Spinner size="lg" />
+      </div>
+    );
   }
 
-  const defaultWorkspace = workspaces[0];
-
   return (
-    <div className={styles.layout}>
-      <aside className={styles.sidebar}>
-        <div className={styles.brand}>
-          <span className={styles.logo}>⬡</span>
-          <span className={styles.brandName}>GENESIS AI</span>
-        </div>
-
-        <nav className={styles.nav}>
-          <Link href="/dashboard" className={`${styles.navItem} ${styles.navItemActive}`}>
-            Projects
-          </Link>
-          <Link href="/dashboard/settings" className={styles.navItem}>
-            Settings
-          </Link>
-        </nav>
-
-        <div className={styles.userProfile}>
-          <div className={styles.avatar}>
-            {user?.email.charAt(0).toUpperCase()}
+    <>
+      <div className={styles.layout}>
+        {/* Sidebar */}
+        <aside className={styles.sidebar}>
+          <div className={styles.brand}>
+            <span className={styles.logo}>⬡</span>
+            <span className={styles.brandName}>GENESIS AI</span>
           </div>
-          <div className={styles.userInfo}>
-            <div className={styles.userEmail}>{user?.email}</div>
+
+          <nav className={styles.nav}>
+            <Link href="/dashboard" className={`${styles.navItem} ${styles.navItemActive}`}>
+              <span className={styles.navIcon}>◈</span>
+              Projects
+            </Link>
+          </nav>
+
+          <div className={styles.userProfile}>
+            <div className={styles.avatar}>
+              {user?.email.charAt(0).toUpperCase() ?? '?'}
+            </div>
+            <div className={styles.userInfo}>
+              <div className={styles.userEmail}>{user?.email}</div>
+              <div className={styles.userRole}>Developer</div>
+            </div>
           </div>
-        </div>
-      </aside>
+        </aside>
 
-      <main className={styles.main}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>
-            {defaultWorkspace ? defaultWorkspace.name : 'Projects'}
-          </h1>
-          <Button variant="primary">
-            + New Project
-          </Button>
-        </header>
-
-        <div className={styles.content}>
-          {projects.length === 0 ? (
-            <div className={styles.emptyState}>
-              <div className={styles.emptyIcon}>🚀</div>
-              <h2 className={styles.emptyTitle}>Ready to build something?</h2>
-              <p className={styles.emptyText}>
-                Describe your idea to GENESIS AI and watch it come to life.
+        {/* Main content */}
+        <main className={styles.main}>
+          <header className={styles.header}>
+            <div>
+              <h1 className={styles.title}>
+                {defaultWorkspace ? defaultWorkspace.name : 'My Projects'}
+              </h1>
+              <p className={styles.headerSub}>
+                {projects.length} project{projects.length !== 1 ? 's' : ''}
               </p>
-              <Button variant="primary" className={styles.emptyAction}>
-                Create your first project
-              </Button>
             </div>
-          ) : (
-            <div className={styles.grid}>
-              {projects.map((project) => (
-                <Link href={`/projects/${project.id}`} key={project.id} className={styles.card}>
-                  <CardHeader>
-                    <CardTitle className={styles.cardTitle}>{project.name}</CardTitle>
-                    <StatusBadge status="active" />
-                  </CardHeader>
-                  <p className={styles.cardDesc}>
-                    {project.description ?? 'No description provided.'}
-                  </p>
-                  <CardFooter className={styles.cardFooter}>
-                    Updated {new Date(project.updated_at).toLocaleDateString()}
-                  </CardFooter>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      </main>
-    </div>
+            <Button
+              id="new-project-btn"
+              variant="primary"
+              onClick={() => setModalOpen(true)}
+            >
+              + New Project
+            </Button>
+          </header>
+
+          <div className={styles.content}>
+            {projects.length === 0 ? (
+              <div className={styles.emptyState}>
+                <div className={styles.emptyOrb} aria-hidden="true" />
+                <div className={styles.emptyIcon}>🚀</div>
+                <h2 className={styles.emptyTitle}>Ready to build something?</h2>
+                <p className={styles.emptyText}>
+                  Describe your idea to GENESIS AI and watch it come to life — from
+                  requirements to working code, automatically.
+                </p>
+                <Button
+                  id="create-first-project-btn"
+                  variant="primary"
+                  className={styles.emptyAction}
+                  onClick={() => setModalOpen(true)}
+                >
+                  Create your first project
+                </Button>
+                <div className={styles.featureHints}>
+                  {['💬 Conversational requirements', '🎨 UI generation', '⚡ Live preview'].map((f) => (
+                    <span key={f} className={styles.hint}>{f}</span>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className={styles.grid}>
+                {projects.map((project) => (
+                  <Link href={`/projects/${project.id}`} key={project.id} className={styles.card}>
+                    <CardHeader>
+                      <CardTitle className={styles.cardTitle}>{project.name}</CardTitle>
+                      <StatusBadge status="active" />
+                    </CardHeader>
+                    <p className={styles.cardDesc}>
+                      {project.description ?? 'No description provided.'}
+                    </p>
+                    <CardFooter className={styles.cardFooter}>
+                      Updated {new Date(project.updated_at).toLocaleDateString()}
+                    </CardFooter>
+                  </Link>
+                ))}
+
+                {/* Quick add card */}
+                <button
+                  id="add-project-card-btn"
+                  className={styles.addCard}
+                  onClick={() => setModalOpen(true)}
+                >
+                  <span className={styles.addIcon}>+</span>
+                  <span className={styles.addText}>New Project</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+
+      <NewProjectModal
+        isOpen={modalOpen}
+        onClose={handleModalClose}
+        defaultWorkspaceId={defaultWorkspace?.id ?? null}
+      />
+    </>
   );
 }

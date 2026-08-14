@@ -1,11 +1,17 @@
-@reference "../globals.css";
+@reference "../../globals.css";
 
+/* ── Layout ──────────────────────────────────────────── */
 .layout {
   @apply flex h-screen bg-background;
 }
 
+.loadingScreen {
+  @apply flex h-screen items-center justify-center bg-background;
+}
+
+/* ── Sidebar ─────────────────────────────────────────── */
 .sidebar {
-  @apply flex w-[260px] flex-col border-r border-border bg-muted/40;
+  @apply flex w-[260px] shrink-0 flex-col border-r border-border bg-muted/30;
 }
 
 .brand {
@@ -13,109 +19,151 @@
 }
 
 .logo {
-  @apply text-2xl text-primary;
-  text-shadow: 0 0 10px var(--color-primary-glow);
+  @apply text-2xl leading-none text-primary;
+  text-shadow: 0 0 12px var(--color-primary);
 }
 
 .brandName {
-  @apply font-semibold tracking-wide text-foreground;
+  @apply font-semibold tracking-widest text-foreground;
+  font-size: 13px;
+  letter-spacing: 0.12em;
 }
 
 .nav {
-  @apply flex flex-1 flex-col gap-2 p-6;
+  @apply flex flex-1 flex-col gap-1 p-4;
 }
 
 .navItem {
-  @apply rounded-md px-4 py-2 font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground;
+  @apply flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground no-underline transition-colors hover:bg-accent hover:text-accent-foreground;
 }
 
 .navItemActive {
   @apply bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary;
 }
 
+.navIcon {
+  @apply shrink-0 text-base leading-none;
+}
+
 .userProfile {
-  @apply flex items-center gap-3 border-t border-border p-6;
+  @apply flex items-center gap-3 border-t border-border p-4;
 }
 
 .avatar {
-  @apply flex h-9 w-9 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground;
+  @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground;
 }
 
 .userInfo {
-  @apply overflow-hidden;
+  @apply min-w-0;
 }
 
 .userEmail {
-  @apply truncate text-sm text-muted-foreground;
+  @apply truncate text-sm font-medium text-foreground;
 }
 
+.userRole {
+  @apply truncate text-xs text-muted-foreground;
+}
+
+/* ── Main ────────────────────────────────────────────── */
 .main {
-  @apply flex flex-1 flex-col overflow-y-auto;
+  @apply flex flex-1 flex-col overflow-hidden;
 }
 
 .header {
-  @apply flex items-center justify-between border-b border-border px-8 py-6;
+  @apply flex items-center justify-between border-b border-border px-8 py-5;
 }
 
 .title {
-  @apply text-2xl font-semibold tracking-tight text-foreground;
+  @apply text-xl font-semibold tracking-tight text-foreground;
+  margin: 0;
+}
+
+.headerSub {
+  @apply mt-0.5 text-sm text-muted-foreground;
+  margin: 0;
 }
 
 .content {
-  @apply flex-1 p-8;
+  @apply flex-1 overflow-y-auto p-8;
 }
 
-/* Empty State */
+/* ── Empty State ─────────────────────────────────────── */
 .emptyState {
-  @apply mx-auto flex h-full max-w-[400px] flex-col items-center justify-center text-center;
+  @apply relative mx-auto flex max-w-[500px] flex-col items-center justify-center py-24 text-center;
+}
+
+.emptyOrb {
+  @apply pointer-events-none absolute left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-40;
+  background: radial-gradient(circle, var(--color-primary-glow) 0%, transparent 70%);
 }
 
 .emptyIcon {
-  @apply mb-6 rounded-full border border-border bg-muted/30 p-6 text-5xl;
+  @apply relative z-10 mb-6 rounded-full border border-border bg-muted/50 p-5 text-4xl;
+  backdrop-filter: blur(8px);
 }
 
 .emptyTitle {
-  @apply mb-3 text-xl font-semibold tracking-tight text-foreground;
+  @apply relative z-10 mb-3 text-2xl font-semibold tracking-tight text-foreground;
 }
 
 .emptyText {
-  @apply mb-8 leading-relaxed text-muted-foreground;
+  @apply relative z-10 mb-8 max-w-[360px] text-sm leading-relaxed text-muted-foreground;
 }
 
-/* Grid */
+.emptyAction {
+  @apply relative z-10;
+}
+
+.featureHints {
+  @apply relative z-10 mt-8 flex flex-wrap items-center justify-center gap-2;
+}
+
+.hint {
+  @apply rounded-full border border-border bg-muted/40 px-3 py-1.5 text-xs text-muted-foreground;
+}
+
+/* ── Project Grid ────────────────────────────────────── */
 .grid {
-  @apply grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3;
+  @apply grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3;
 }
 
 .card {
-  @apply relative flex flex-col gap-4 overflow-hidden rounded-xl border border-border bg-card p-6 transition-all duration-200 hover:-translate-y-1 hover:border-border/80 hover:shadow-lg;
+  @apply relative flex flex-col gap-4 overflow-hidden rounded-xl border border-border bg-card p-6 no-underline transition-all duration-200 hover:-translate-y-0.5 hover:border-border-accent hover:shadow-lg;
 }
 
 .card::before {
   content: '';
-  @apply absolute left-0 right-0 top-0 h-0.5 bg-gradient-to-r from-primary to-[#7c3aed] opacity-0 transition-opacity duration-200;
+  @apply absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-primary to-[#7c3aed] opacity-0 transition-opacity duration-200;
 }
 
 .card:hover::before {
   @apply opacity-100;
 }
 
-.cardHeader {
-  @apply flex items-start justify-between;
-}
-
 .cardTitle {
-  @apply text-lg font-semibold tracking-tight text-foreground;
-}
-
-.statusBadge {
-  @apply rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-xs text-emerald-500;
+  @apply text-base font-semibold tracking-tight text-foreground;
 }
 
 .cardDesc {
   @apply flex-1 line-clamp-3 text-sm text-muted-foreground;
+  margin: 0;
 }
 
 .cardFooter {
   @apply mt-auto border-t border-border pt-4 text-xs text-muted-foreground;
+}
+
+/* ── Add Card ────────────────────────────────────────── */
+.addCard {
+  @apply flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-transparent p-6 text-muted-foreground transition-all duration-200 hover:border-primary/40 hover:bg-primary/5 hover:text-primary;
+  min-height: 160px;
+}
+
+.addIcon {
+  @apply flex h-10 w-10 items-center justify-center rounded-full border border-current text-xl leading-none;
+}
+
+.addText {
+  @apply text-sm font-medium;
 }

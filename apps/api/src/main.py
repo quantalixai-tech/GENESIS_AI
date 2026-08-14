@@ -24,7 +24,7 @@ Architecture:
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import settings
@@ -109,32 +109,34 @@ app.add_exception_handler(Exception, unhandled_exception_handler)
 # Routes
 # ---------------------------------------------------------------------------
 
-# System routes (no version prefix — stable contract for infra tooling)
-from api.v1 import health as health_module  # noqa: E402
+# NOTE: Route imports are intentionally placed after configure_logging() above.
+# Route modules reference settings/logging at module level, so they must be
+# imported after the logging subsystem is initialized.
+from api.v1 import agents  # noqa: E402, I001
+from api.v1 import auth  # noqa: E402, I001
+from api.v1 import conversations  # noqa: E402, I001
+from api.v1 import git  # noqa: E402, I001
+from api.v1 import health as health_module  # noqa: E402, I001
+from api.v1 import preview  # noqa: E402, I001
+from api.v1 import projects  # noqa: E402, I001
+from api.v1 import workspaces  # noqa: E402, I001
+from core.security import get_current_user  # noqa: E402, I001
 
-app.include_router(health_module.router, prefix="/api")
 
-# Versioned API routes
-from fastapi import Depends
-from api.v1 import agents, auth, conversations, git, projects, workspaces  # noqa: E402
-from core.security import get_current_user
 
-api_v1_prefix = f"/api/{settings.api_version}"
+# API v1 Router Setup
+api_v1_prefix = "/api/v1"
 protected = [Depends(get_current_user)]
 
+app.include_router(health_module.router, prefix="/api")
 app.include_router(auth.router, prefix=api_v1_prefix)
 app.include_router(workspaces.router, prefix=api_v1_prefix, dependencies=protected)
 app.include_router(projects.router, prefix=api_v1_prefix, dependencies=protected)
-
-# Conversation domain
 app.include_router(conversations.router, prefix=api_v1_prefix, dependencies=protected)
 app.include_router(conversations.requirements_router, prefix=api_v1_prefix, dependencies=protected)
-
-# Agent governance
 app.include_router(agents.router, prefix=api_v1_prefix, dependencies=protected)
-
-# Git history
 app.include_router(git.router, prefix=api_v1_prefix, dependencies=protected)
+app.include_router(preview.router, prefix=api_v1_prefix, dependencies=protected)
 
 
 # ---------------------------------------------------------------------------

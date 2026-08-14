@@ -1,0 +1,117 @@
+@reference "../../globals.css";
+
+/* ── Overlay ─────────────────────────────────────────── */
+.overlay {
+  @apply fixed inset-0 z-50 flex items-center justify-center p-4;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── Modal card ──────────────────────────────────────── */
+.modal {
+  @apply relative w-full max-w-[520px] rounded-2xl border border-border bg-card shadow-2xl;
+  animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Header ──────────────────────────────────────────── */
+.header {
+  @apply flex items-center gap-4 border-b border-border p-6;
+}
+
+.headerIcon {
+  @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-2xl leading-none text-primary;
+  background: var(--color-primary-glow);
+  text-shadow: 0 0 12px var(--color-primary);
+}
+
+.title {
+  @apply text-xl font-semibold tracking-tight text-foreground;
+  margin: 0;
+}
+
+.subtitle {
+  @apply mt-0.5 text-sm text-muted-foreground;
+  margin: 0;
+}
+
+.closeBtn {
+  @apply ml-auto flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-0 bg-transparent text-muted-foreground transition-colors hover:bg-muted hover:text-foreground;
+  font-size: 14px;
+}
+
+/* ── Form ────────────────────────────────────────────── */
+.form {
+  @apply flex flex-col gap-5 p-6;
+}
+
+.alert {
+  @apply -mt-1;
+}
+
+.field {
+  @apply flex flex-col gap-2;
+}
+
+.label {
+  @apply text-sm font-medium text-foreground;
+}
+
+.required {
+  @apply text-destructive;
+}
+
+.optional {
+  @apply font-normal text-muted-foreground;
+}
+
+.input {
+  @apply flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-all placeholder:text-muted-foreground;
+}
+
+.input:focus {
+  @apply border-ring ring-2 ring-ring;
+}
+
+.textarea {
+  @apply w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-all placeholder:text-muted-foreground;
+  line-height: 1.6;
+}
+
+.textarea:focus {
+  @apply border-ring ring-2 ring-ring;
+}
+
+/* ── Actions ─────────────────────────────────────────── */
+.actions {
+  @apply flex items-center justify-end gap-3 border-t border-border pt-5;
+}
+
+.cancelBtn {
+  @apply cursor-pointer rounded-lg border border-border bg-transparent px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground;
+}
+
+/* ── Creating state ──────────────────────────────────── */
+.creatingState {
+  @apply flex flex-col items-center justify-center gap-4 py-16 text-center;
+}
+
+.creatingTitle {
+  @apply text-base font-semibold text-foreground;
+  margin: 0;
+}
+
+.creatingSubtitle {
+  @apply text-sm text-muted-foreground;
+  margin: 0;
+}

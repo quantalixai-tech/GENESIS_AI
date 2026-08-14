@@ -1,0 +1,6 @@
+{
+  "name": "@repo/config",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Placeholder — shared configuration utilities. To be implemented in a future phase."
+}
