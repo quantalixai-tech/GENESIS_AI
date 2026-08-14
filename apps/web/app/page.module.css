@@ -2,7 +2,7 @@
    Genesis Landing Page — page.module.css
    ============================================================ */
 
-@reference "globals.css";
+@reference "./globals.css";
 
 .main {
   position: relative;

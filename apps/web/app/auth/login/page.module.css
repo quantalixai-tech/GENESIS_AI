@@ -1,4 +1,4 @@
-@reference "../../../globals.css";
+@reference "../../globals.css";
 
 .main {
   @apply relative flex min-h-screen items-center justify-center overflow-hidden p-8;
